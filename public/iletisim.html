@@ -101,12 +101,12 @@
                     <label>Konu <span class="zorunlu">*</span></label>
                     <select id="konu">
                         <option value="">Konu seçin</option>
-                        <option value="Konut Satışı">Konut Satışı</option>
-                        <option value="Konut Kirası">Konut Kirası</option>
-                        <option value="Arsa Satışı">Arsa Satışı</option>
-                        <option value="İş Yeri">İş Yeri / Dükkan</option>
-                        <option value="Emlak Değerleme">Emlak Değerleme</option>
-                        <option value="Diğer">Diğer</option>
+                        <option value="Konut Satisi">Konut Satışı</option>
+                        <option value="Konut Kirasi">Konut Kirası</option>
+                        <option value="Arsa Satisi">Arsa Satışı</option>
+                        <option value="Is Yeri">İş Yeri / Dükkan</option>
+                        <option value="Emlak Degerleme">Emlak Değerleme</option>
+                        <option value="Diger">Diğer</option>
                     </select>
                 </div>
 
@@ -120,7 +120,7 @@
                 <button class="iletisim-gonder-btn" onclick="formuGonder()">Mesaj Gönder</button>
 
                 <p class="gizlilik-notu">
-                    🔒 Gizlilik: Form aracılığıyla paylaştığınız kişisel bilgiler sadece size dönüş yapmak amacıyla
+                    Gizlilik: Form aracılığıyla paylaştığınız kişisel bilgiler sadece size dönüş yapmak amacıyla
                     kullanılacaktır. Bilgileriniz üçüncü şahıslarla paylaşılmayacaktır.
                 </p>
 
@@ -133,7 +133,7 @@
     <div id="footer-alani"></div>
 
     <script>
-        async function formuGonder() {
+        function formuGonder() {
             const ad_soyad = document.getElementById('ad_soyad').value.trim();
             const telefon = document.getElementById('telefon').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -141,11 +141,29 @@
             const mesaj = document.getElementById('mesaj').value.trim();
 
             if (!ad_soyad || !telefon || !email || !konu || !mesaj) {
-                bildirimGoster('❌ Lütfen tüm zorunlu alanları doldurun!', 'hata');
+                bildirimGoster('Lutfen tum zorunlu alanlari doldurun!', 'hata');
                 return;
             }
 
-            bildirimGoster('✅ Mesajınız alındı! En kısa sürede size dönüş yapacağız.', 'basari');
+            // WhatsApp
+            const wpMesaj = encodeURIComponent(
+                `Merhaba, iletisim formundan mesaj var:\n\n` +
+                `Ad Soyad: ${ad_soyad}\n` +
+                `Telefon: ${telefon}\n` +
+                `E-posta: ${email}\n` +
+                `Konu: ${konu}\n\n` +
+                `Mesaj: ${mesaj}`
+            );
+            window.open(`https://wa.me/905068153434?text=${wpMesaj}`, '_blank');
+
+            // Mail
+            const mailKonu = encodeURIComponent(`Iletisim Formu: ${konu}`);
+            const mailIcerik = encodeURIComponent(
+                `Ad Soyad: ${ad_soyad}\nTelefon: ${telefon}\nE-posta: ${email}\nKonu: ${konu}\n\nMesaj: ${mesaj}`
+            );
+            window.location.href = `mailto:pelinbingol00@gmail.com?subject=${mailKonu}&body=${mailIcerik}`;
+
+            bildirimGoster('WhatsApp ve mail aciliyor...', 'basari');
 
             ['ad_soyad', 'telefon', 'email', 'mesaj'].forEach(id => {
                 document.getElementById(id).value = '';

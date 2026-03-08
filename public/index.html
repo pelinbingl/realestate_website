@@ -79,7 +79,7 @@
                 const anaResim = ilan.resim || 'https://via.placeholder.com/400x250?text=Resim+Yok';
 
                 return `
-                    <div class="card" data-tip="${ilan.tip}">
+                   <div class="card" data-tip="${ilan.tip}" onclick="ilanDetay(${ilan.id})" style="cursor:pointer;">
                         <div class="card-img-wrap">
                             <img src="${anaResim}" alt="${ilan.baslik}">
                             <span class="badge ${badgeClass}">${badgeYazi}</span>

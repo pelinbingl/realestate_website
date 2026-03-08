@@ -87,11 +87,11 @@
                     <div class="iletisim-bilgi">
                         <div class="iletisim-satir">
                             <span>👤</span>
-                            <p>Emlak Durağı Danışmanı</p>
+                            <p>Emlak Danışmanı - Oktay Bingöl</p>
                         </div>
                         <div class="iletisim-satir">
                             <span>📞</span>
-                            <p>+90 (552) 410 36 69</p>
+                            <p>+90 (534) 540 64 64</p>
                         </div>
                         <div class="iletisim-satir">
                             <span>✉️</span>
@@ -100,7 +100,7 @@
                     </div>
                     <div class="iletisim-butonlar">
                         <a href="iletisim.html" class="iletisim-btn">✉️ Mesaj Gönder</a>
-                        <a href="https://wa.me/905524103669" class="ara-btn" target="_blank">💬 WhatsApp</a>
+                        <a id="wp-btn" href="#" class="ara-btn" target="_blank">💬 WhatsApp</a>
                     </div>
                 </div>
 
@@ -119,7 +119,6 @@
     <div id="footer-alani"></div>
 
     <script>
-        // components.js'nin DOMContentLoaded'ı ile çakışmaması için window.onload kullanıyoruz
         window.addEventListener('load', () => {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
@@ -156,7 +155,6 @@
         function sayfayiDoldur(ilan) {
             document.title = ilan.baslik + ' | Emlak Durağı';
 
-            // Resimleri hazırla
             const tumResimler = ilan.resimler
                 ? ilan.resimler.split(',').filter(r => r.trim())
                 : (ilan.resim ? [ilan.resim] : []);
@@ -164,7 +162,6 @@
             const anaResim = tumResimler[0] || 'https://via.placeholder.com/800x500?text=Resim+Yok';
             document.getElementById('detay-resim-buyuk').src = anaResim;
 
-            // Thumbnails
             const thumbContainer = document.getElementById('galeri-thumbnails');
             if (tumResimler.length > 1) {
                 thumbContainer.innerHTML = tumResimler.map((url, i) => `
@@ -177,39 +174,43 @@
                 thumbContainer.style.display = 'none';
             }
 
-            // Badge
             const badge = document.getElementById('detay-badge');
             badge.textContent = ilan.tip === 'kiralik' ? 'Kiralık' : 'Satılık';
             badge.className = 'badge ' + (ilan.tip === 'kiralik' ? 'kiralik-badge' : 'satilik-badge');
             document.getElementById('detay-tip-badge').textContent = ilan.emlak_tipi;
 
-            // Başlık ve konum
             document.getElementById('detay-baslik').textContent = ilan.baslik;
             document.getElementById('detay-konum-yazi').textContent = '📍 ' + ilan.konum;
 
-            // Fiyat
             const fiyatGoster = ilan.tip === 'kiralik'
                 ? `₺${ilan.fiyat.toLocaleString('tr-TR')} / ay`
                 : `₺${ilan.fiyat.toLocaleString('tr-TR')}`;
             document.getElementById('detay-fiyat').textContent = fiyatGoster;
 
-            // Tarih
             const tarih = new Date(ilan.tarih);
             const tarihStr = tarih.toLocaleDateString('tr-TR');
             document.getElementById('detay-tarih').textContent = 'İlan Tarihi: ' + tarihStr;
 
-            // Açıklama
             document.getElementById('detay-aciklama-metin').textContent =
                 ilan.aciklama || 'Bu ilan için açıklama girilmemiş.';
 
-            // Harita
             const konumEncoded = encodeURIComponent(ilan.konum + ', Türkiye');
             document.getElementById('harita-iframe').src =
                 `https://maps.google.com/maps?q=${konumEncoded}&output=embed&z=15`;
             document.getElementById('harita-link').href =
                 `https://www.google.com/maps/search/?api=1&query=${konumEncoded}`;
 
-            // Arsa mı konut mu?
+            // ✅ Canlı site linki + doğru numara
+            const ilanLinki = `https://emlak-duragi.onrender.com/ilan-detay.html?id=${ilan.id}`;
+            const wpMesaj = encodeURIComponent(
+                `Merhaba, asagidaki ilan hakkinda bilgi almak istiyorum:\n\n` +
+                `Baslik: ${ilan.baslik}\n` +
+                `Konum: ${ilan.konum}\n` +
+                `Fiyat: ${ilan.fiyat.toLocaleString('tr-TR')} TL\n\n` +
+                `Link: ${ilanLinki}`
+            );
+            document.getElementById('wp-btn').href = `https://wa.me/905068153434?text=${wpMesaj}`;
+
             const arsaTipleri = ['Arsa', 'Tarla', 'Bağ & Bahçe', 'Zeytinlik', 'Çiftlik'];
             const arsaMi = arsaTipleri.includes(ilan.emlak_tipi);
 
@@ -246,7 +247,6 @@
                 </div>
             `).join('');
 
-            // Özellikler
             if (ilan.ozellikler && !arsaMi) {
                 const ozellikler = ilan.ozellikler.split(', ');
                 document.getElementById('ozellik-listesi').innerHTML =

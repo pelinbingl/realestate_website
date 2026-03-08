@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İlan Detay | Emlak Durağı</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="components.js"></script>
+</head>
+
+<body>
+
+    <!-- ORTAK HEADER -->
+    <div id="header-alani"></div>
+
+    <div id="yukleniyor" style="text-align:center;padding:80px;font-size:18px;color:#999;">
+        ⏳ İlan yükleniyor...
+    </div>
+
+    <div id="bulunamadi" style="display:none;text-align:center;padding:80px;">
+        <h2 style="color:#999;">😕 İlan bulunamadı</h2>
+        <a href="index.html" style="color:#f9e01a;font-weight:bold;">← Ana Sayfaya Dön</a>
+    </div>
+
+    <div id="detay-icerik" style="display:none;">
+
+        <div class="detay-container">
+
+            <!-- SOL -->
+            <div class="detay-sol">
+
+                <div class="detay-resim-wrap">
+                    <img id="detay-resim-buyuk" src="" alt="İlan Resmi">
+                    <span id="detay-badge" class="badge"></span>
+                    <span id="detay-tip-badge" class="tip-badge"></span>
+                </div>
+
+                <div class="galeri-thumbnails" id="galeri-thumbnails"></div>
+
+                <div class="detay-sekmeler">
+                    <button class="sekme-btn aktif-sekme" onclick="sekmeAc(this, 'aciklama')">İlan Açıklaması</button>
+                    <button class="sekme-btn" onclick="sekmeAc(this, 'konum')">Konum</button>
+                </div>
+
+                <div class="sekme-icerik aktif-icerik" id="sekme-aciklama">
+                    <p id="detay-aciklama-metin"></p>
+                </div>
+
+                <div class="sekme-icerik" id="sekme-konum">
+                    <div class="harita-alan">
+                        <iframe id="harita-iframe" width="100%" height="350" style="border:0; border-radius:12px;"
+                            loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" src="">
+                        </iframe>
+                        <a id="harita-link" href="#" target="_blank" class="harita-yonlendir-btn">
+                            🗺️ Google Maps'te Aç
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SAĞ -->
+            <div class="detay-sag">
+
+                <div class="detay-baslik-box">
+                    <h1 id="detay-baslik"></h1>
+                    <p id="detay-konum-yazi" class="detay-konum"></p>
+                    <div class="detay-fiyat-wrap">
+                        <span id="detay-fiyat" class="detay-fiyat"></span>
+                        <span id="detay-tarih" class="detay-tarih"></span>
+                    </div>
+                </div>
+
+                <div class="detay-bilgi-box">
+                    <h3>🏠 İlan Özellikleri</h3>
+                    <div class="bilgi-tablo" id="bilgi-tablo"></div>
+                </div>
+
+                <div class="detay-ozellik-box" id="ozellik-box" style="display:none;">
+                    <h3>✨ Özellikler</h3>
+                    <div class="ozellik-listesi" id="ozellik-listesi"></div>
+                </div>
+
+                <div class="detay-iletisim-box">
+                    <h3>📞 İletişime Geçin</h3>
+                    <div class="iletisim-bilgi">
+                        <div class="iletisim-satir">
+                            <span>👤</span>
+                            <p>Emlak Durağı Danışmanı</p>
+                        </div>
+                        <div class="iletisim-satir">
+                            <span>📞</span>
+                            <p>+90 (552) 410 36 69</p>
+                        </div>
+                        <div class="iletisim-satir">
+                            <span>✉️</span>
+                            <p>info@emlakduragi.com</p>
+                        </div>
+                    </div>
+                    <div class="iletisim-butonlar">
+                        <a href="iletisim.html" class="iletisim-btn">✉️ Mesaj Gönder</a>
+                        <a href="https://wa.me/905524103669" class="ara-btn" target="_blank">💬 WhatsApp</a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="benzer-ilanlar">
+            <h2 class="section-title">Benzer İlanlar</h2>
+            <div class="cards-container" id="benzer-cards"></div>
+        </div>
+
+    </div>
+
+    <!-- ORTAK FOOTER -->
+    <div id="footer-alani"></div>
+
+    <script>
+        // components.js'nin DOMContentLoaded'ı ile çakışmaması için window.onload kullanıyoruz
+        window.addEventListener('load', () => {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+
+            if (!id) {
+                document.getElementById('yukleniyor').style.display = 'none';
+                document.getElementById('bulunamadi').style.display = 'block';
+                return;
+            }
+            ilanGetir(id);
+        });
+
+        async function ilanGetir(id) {
+            try {
+                const cevap = await fetch(`/api/ilanlar/${id}`);
+
+                if (!cevap.ok) {
+                    document.getElementById('yukleniyor').style.display = 'none';
+                    document.getElementById('bulunamadi').style.display = 'block';
+                    return;
+                }
+
+                const ilan = await cevap.json();
+                sayfayiDoldur(ilan);
+                benzerIlanlariGetir(ilan);
+
+            } catch (hata) {
+                console.error('Hata:', hata);
+                document.getElementById('yukleniyor').style.display = 'none';
+                document.getElementById('bulunamadi').style.display = 'block';
+            }
+        }
+
+        function sayfayiDoldur(ilan) {
+            document.title = ilan.baslik + ' | Emlak Durağı';
+
+            // Resimleri hazırla
+            const tumResimler = ilan.resimler
+                ? ilan.resimler.split(',').filter(r => r.trim())
+                : (ilan.resim ? [ilan.resim] : []);
+
+            const anaResim = tumResimler[0] || 'https://via.placeholder.com/800x500?text=Resim+Yok';
+            document.getElementById('detay-resim-buyuk').src = anaResim;
+
+            // Thumbnails
+            const thumbContainer = document.getElementById('galeri-thumbnails');
+            if (tumResimler.length > 1) {
+                thumbContainer.innerHTML = tumResimler.map((url, i) => `
+                    <img src="${url.trim()}"
+                         class="${i === 0 ? 'aktif-thumb' : ''}"
+                         onclick="resimDegistir(this, '${url.trim()}')"
+                         alt="Resim ${i + 1}">
+                `).join('');
+            } else {
+                thumbContainer.style.display = 'none';
+            }
+
+            // Badge
+            const badge = document.getElementById('detay-badge');
+            badge.textContent = ilan.tip === 'kiralik' ? 'Kiralık' : 'Satılık';
+            badge.className = 'badge ' + (ilan.tip === 'kiralik' ? 'kiralik-badge' : 'satilik-badge');
+            document.getElementById('detay-tip-badge').textContent = ilan.emlak_tipi;
+
+            // Başlık ve konum
+            document.getElementById('detay-baslik').textContent = ilan.baslik;
+            document.getElementById('detay-konum-yazi').textContent = '📍 ' + ilan.konum;
+
+            // Fiyat
+            const fiyatGoster = ilan.tip === 'kiralik'
+                ? `₺${ilan.fiyat.toLocaleString('tr-TR')} / ay`
+                : `₺${ilan.fiyat.toLocaleString('tr-TR')}`;
+            document.getElementById('detay-fiyat').textContent = fiyatGoster;
+
+            // Tarih
+            const tarih = new Date(ilan.tarih);
+            const tarihStr = tarih.toLocaleDateString('tr-TR');
+            document.getElementById('detay-tarih').textContent = 'İlan Tarihi: ' + tarihStr;
+
+            // Açıklama
+            document.getElementById('detay-aciklama-metin').textContent =
+                ilan.aciklama || 'Bu ilan için açıklama girilmemiş.';
+
+            // Harita
+            const konumEncoded = encodeURIComponent(ilan.konum + ', Türkiye');
+            document.getElementById('harita-iframe').src =
+                `https://maps.google.com/maps?q=${konumEncoded}&output=embed&z=15`;
+            document.getElementById('harita-link').href =
+                `https://www.google.com/maps/search/?api=1&query=${konumEncoded}`;
+
+            // Arsa mı konut mu?
+            const arsaTipleri = ['Arsa', 'Tarla', 'Bağ & Bahçe', 'Zeytinlik', 'Çiftlik'];
+            const arsaMi = arsaTipleri.includes(ilan.emlak_tipi);
+
+            let bilgiler = [{ baslik: 'İlan Tarihi', deger: tarihStr }];
+
+            if (arsaMi) {
+                bilgiler.push({ baslik: 'Alan', deger: ilan.metrekare + ' m²' });
+                if (ilan.imar) bilgiler.push({ baslik: 'İmar Durumu', deger: ilan.imar });
+                if (ilan.ada_parsel) bilgiler.push({ baslik: 'Ada / Parsel', deger: ilan.ada_parsel });
+                if (ilan.cephe) bilgiler.push({ baslik: 'Cephe', deger: ilan.cephe });
+                if (ilan.kredi_uygunluk) bilgiler.push({ baslik: 'Krediye Uygunluk', deger: ilan.kredi_uygunluk });
+                if (ilan.takas) bilgiler.push({ baslik: 'Takas', deger: ilan.takas });
+                bilgiler.push({ baslik: 'İlan Tipi', deger: 'Satılık' });
+                bilgiler.push({ baslik: 'Emlak Tipi', deger: ilan.emlak_tipi });
+            } else {
+                if (ilan.oda) bilgiler.push({ baslik: 'Oda Sayısı', deger: ilan.oda });
+                if (ilan.metrekare) bilgiler.push({ baslik: 'Net Alan', deger: ilan.metrekare + ' m²' });
+                if (ilan.bina_yasi) bilgiler.push({ baslik: 'Bina Yaşı', deger: ilan.bina_yasi });
+                if (ilan.kat) bilgiler.push({ baslik: 'Bulunduğu Kat', deger: ilan.kat });
+                if (ilan.banyo) bilgiler.push({ baslik: 'Banyo Sayısı', deger: ilan.banyo });
+                if (ilan.isitma) bilgiler.push({ baslik: 'Isıtma', deger: ilan.isitma });
+                if (ilan.teras) bilgiler.push({ baslik: 'Teras', deger: ilan.teras });
+                if (ilan.balkon) bilgiler.push({ baslik: 'Balkon', deger: ilan.balkon });
+                if (ilan.esyali) bilgiler.push({ baslik: 'Eşyalı', deger: ilan.esyali });
+                if (ilan.site) bilgiler.push({ baslik: 'Site', deger: ilan.site });
+                bilgiler.push({ baslik: 'İlan Tipi', deger: ilan.tip === 'kiralik' ? 'Kiralık' : 'Satılık' });
+                bilgiler.push({ baslik: 'Emlak Tipi', deger: ilan.emlak_tipi });
+            }
+
+            document.getElementById('bilgi-tablo').innerHTML = bilgiler.map(b => `
+                <div class="bilgi-satir">
+                    <span class="bilgi-satir-baslik">${b.baslik}</span>
+                    <span class="bilgi-satir-deger">${b.deger}</span>
+                </div>
+            `).join('');
+
+            // Özellikler
+            if (ilan.ozellikler && !arsaMi) {
+                const ozellikler = ilan.ozellikler.split(', ');
+                document.getElementById('ozellik-listesi').innerHTML =
+                    ozellikler.map(o => `<span class="ozellik-tag">✅ ${o}</span>`).join('');
+                document.getElementById('ozellik-box').style.display = 'block';
+            } else {
+                document.getElementById('ozellik-box').style.display = 'none';
+            }
+
+            document.getElementById('yukleniyor').style.display = 'none';
+            document.getElementById('detay-icerik').style.display = 'block';
+        }
+
+        function resimDegistir(thumb, url) {
+            document.getElementById('detay-resim-buyuk').src = url;
+            document.querySelectorAll('.galeri-thumbnails img').forEach(img => {
+                img.classList.remove('aktif-thumb');
+            });
+            thumb.classList.add('aktif-thumb');
+        }
+
+        function sekmeAc(buton, sekmeId) {
+            document.querySelectorAll('.sekme-btn').forEach(b => b.classList.remove('aktif-sekme'));
+            buton.classList.add('aktif-sekme');
+            document.querySelectorAll('.sekme-icerik').forEach(s => s.classList.remove('aktif-icerik'));
+            document.getElementById('sekme-' + sekmeId).classList.add('aktif-icerik');
+        }
+
+        async function benzerIlanlariGetir(ilan) {
+            try {
+                const cevap = await fetch(`/api/ilanlar?tip=${ilan.tip}`);
+                let ilanlar = await cevap.json();
+                ilanlar = ilanlar.filter(i => i.id !== ilan.id).slice(0, 3);
+
+                if (ilanlar.length === 0) return;
+
+                document.getElementById('benzer-cards').innerHTML = ilanlar.map(i => {
+                    const fiyat = i.tip === 'kiralik'
+                        ? `₺${i.fiyat.toLocaleString('tr-TR')} / ay`
+                        : `₺${i.fiyat.toLocaleString('tr-TR')}`;
+                    const odaBilgi = i.oda ? `<span>🛏 ${i.oda}</span>` : '';
+                    const resim = i.resim || 'https://via.placeholder.com/400x250?text=Resim+Yok';
+
+                    return `
+                        <div class="card" onclick="window.location.href='ilan-detay.html?id=${i.id}'" style="cursor:pointer;">
+                            <div class="card-img-wrap">
+                                <img src="${resim}" alt="${i.baslik}">
+                                <span class="badge ${i.tip === 'kiralik' ? 'kiralik-badge' : 'satilik-badge'}">
+                                    ${i.tip === 'kiralik' ? 'Kiralık' : 'Satılık'}
+                                </span>
+                                <span class="tip-badge">${i.emlak_tipi}</span>
+                            </div>
+                            <div class="card-info">
+                                <h3>${i.baslik}</h3>
+                                <p class="location">📍 ${i.konum}</p>
+                                <div class="card-details">
+                                    ${odaBilgi}
+                                    <span>📐 ${i.metrekare} m²</span>
+                                </div>
+                                <div class="card-footer">
+                                    <span class="price">${fiyat}</span>
+                                    <button onclick="event.stopPropagation(); window.location.href='ilan-detay.html?id=${i.id}'">Detay →</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (hata) {
+                console.error('Benzer ilanlar yüklenemedi:', hata);
+            }
+        }
+    </script>
+
+</body>
+
+</html>

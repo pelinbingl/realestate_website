@@ -1,0 +1,4 @@
+node_modules/
+emlak.db
+public/uploads/
+.env

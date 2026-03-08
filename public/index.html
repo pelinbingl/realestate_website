@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emlak Durağı | Gayrimenkul Danışmanlığı</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="components.js"></script>
+</head>
+
+<body>
+
+    <!-- ORTAK HEADER -->
+    <div id="header-alani"></div>
+
+    <!-- HERO BÖLÜMÜ -->
+    <section class="hero">
+        <div class="hero-content">
+            <h2>Hayalinizdeki Evi<br>Birlikte Bulalım</h2>
+            <p>Binlerce kiralık ve satılık ilan arasından size özel seçenekler</p>
+        </div>
+    </section>
+
+    <!-- İLANLAR BÖLÜMÜ -->
+    <section class="listings">
+
+        <div class="listings-header">
+            <h2 class="section-title">Son Eklenen İlanlar</h2>
+            <div class="filter-btns">
+                <button class="filter-btn active-filter" onclick="filterIlan(this, 'tumu')">Tümü</button>
+                <button class="filter-btn" onclick="filterIlan(this, 'kiralik')">Kiralık</button>
+                <button class="filter-btn" onclick="filterIlan(this, 'satilik')">Satılık</button>
+            </div>
+        </div>
+
+        <div class="cards-container" id="cards-container">
+            <!-- Kartlar JavaScript ile API'den gelecek -->
+        </div>
+
+    </section>
+
+    <!-- ORTAK FOOTER -->
+    <div id="footer-alani"></div>
+
+    <script>
+        // Sayfa yüklenince ilanları getir
+        document.addEventListener('DOMContentLoaded', () => {
+            ilanlariGetir('tumu');
+        });
+
+        async function ilanlariGetir(tip) {
+            try {
+                const url = tip === 'tumu' ? '/api/ilanlar' : `/api/ilanlar?tip=${tip}`;
+                const cevap = await fetch(url);
+                const ilanlar = await cevap.json();
+                kartlariGoster(ilanlar);
+            } catch (hata) {
+                console.error('İlanlar yüklenemedi:', hata);
+            }
+        }
+
+        function kartlariGoster(ilanlar) {
+            const container = document.getElementById('cards-container');
+
+            if (ilanlar.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">Bu kategoride ilan bulunamadı.</p>';
+                return;
+            }
+
+            container.innerHTML = ilanlar.map(ilan => {
+                const fiyatGoster = ilan.tip === 'kiralik'
+                    ? `₺${ilan.fiyat.toLocaleString('tr-TR')} / ay`
+                    : `₺${ilan.fiyat.toLocaleString('tr-TR')}`;
+
+                const badgeClass = ilan.tip === 'kiralik' ? 'kiralik-badge' : 'satilik-badge';
+                const badgeYazi = ilan.tip === 'kiralik' ? 'Kiralık' : 'Satılık';
+                const odaBilgi = ilan.oda ? `<span>🛏 ${ilan.oda}</span>` : '';
+                const anaResim = ilan.resim || 'https://via.placeholder.com/400x250?text=Resim+Yok';
+
+                return `
+                    <div class="card" data-tip="${ilan.tip}">
+                        <div class="card-img-wrap">
+                            <img src="${anaResim}" alt="${ilan.baslik}">
+                            <span class="badge ${badgeClass}">${badgeYazi}</span>
+                            <span class="tip-badge">${ilan.emlak_tipi}</span>
+                        </div>
+                        <div class="card-info">
+                            <h3>${ilan.baslik}</h3>
+                            <p class="location">📍 ${ilan.konum}</p>
+                            <div class="card-details">
+                                ${odaBilgi}
+                                <span>📐 ${ilan.metrekare} m²</span>
+                            </div>
+                            <div class="card-footer">
+                                <span class="price">${fiyatGoster}</span>
+                                <button onclick="ilanDetay(${ilan.id})">Detay →</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterIlan(buton, tip) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active-filter'));
+            buton.classList.add('active-filter');
+            ilanlariGetir(tip);
+        }
+
+        function ilanDetay(id) {
+            window.location.href = `ilan-detay.html?id=${id}`;
+        }
+    </script>
+
+</body>
+
+</html>

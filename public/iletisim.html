@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İletişim | Emlak Durağı</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="components.js"></script>
+</head>
+
+<body>
+
+    <!-- ORTAK HEADER -->
+    <div id="header-alani"></div>
+
+    <!-- SAYFA BAŞLIĞI -->
+    <div class="iletisim-hero">
+        <h1>İletişim</h1>
+        <p>Hayalinizdeki ev için bizimle iletişime geçin.<br>Uzman ekibimiz size yardımcı olmak için burada.</p>
+    </div>
+
+    <!-- ANA İÇERİK -->
+    <div class="iletisim-container">
+
+        <!-- SOL: BİLGİLER -->
+        <div class="iletisim-sol">
+
+            <div class="iletisim-kart">
+                <h3>İletişim Bilgileri</h3>
+
+                <div class="iletisim-bilgi-satir">
+                    <div class="bilgi-ikon-daire">📞</div>
+                    <div>
+                        <strong>Telefon</strong>
+                        <p><a href="tel:+905524103669">+90 (552) 410 36 69</a></p>
+                        <p><a href="tel:+905414748280">+90 (541) 474 82 80</a></p>
+                    </div>
+                </div>
+
+                <div class="iletisim-bilgi-satir">
+                    <div class="bilgi-ikon-daire">✉️</div>
+                    <div>
+                        <strong>E-posta</strong>
+                        <p><a href="mailto:info@emlakduragi.com">info@emlakduragi.com</a></p>
+                    </div>
+                </div>
+
+                <div class="iletisim-bilgi-satir">
+                    <div class="bilgi-ikon-daire">📍</div>
+                    <div>
+                        <strong>Adres</strong>
+                        <p>Kültür Mahallesi</p>
+                        <p>İstiklal Caddesi</p>
+                        <p>Orkide Apt. No:5/C</p>
+                        <p>Aliağa/İzmir</p>
+                    </div>
+                </div>
+
+                <div class="iletisim-bilgi-satir">
+                    <div class="bilgi-ikon-daire">🕐</div>
+                    <div>
+                        <strong>Çalışma Saatleri</strong>
+                        <p>Pazartesi - Cuma: 09:00 - 18:00</p>
+                        <p>Cumartesi: 09:00 - 16:00</p>
+                        <p>Pazar: Kapalı</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="iletisim-kart iletisim-hakkimizda">
+                <h3>Emlak Durağı Gayrimenkul Danışmanlığı</h3>
+                <p>İzmir bölgesinde, hayalinizdeki evi bulmanızda size yardımcı oluyoruz. Profesyonel ekibimiz,
+                    güvenilir hizmet anlayışımız ve geniş portföyümüzle gayrimenkul ihtiyaçlarınıza çözüm
+                    ortağınızız.</p>
+            </div>
+
+        </div>
+
+        <!-- SAĞ: FORM -->
+        <div class="iletisim-sag">
+            <div class="iletisim-kart">
+                <h3>Bize Ulaşın</h3>
+
+                <div class="form-iki-sutun">
+                    <div class="form-group">
+                        <label>Ad Soyad <span class="zorunlu">*</span></label>
+                        <input type="text" id="ad_soyad" placeholder="Adınız ve soyadınız">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefon <span class="zorunlu">*</span></label>
+                        <input type="tel" id="telefon" placeholder="0555 123 45 67">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>E-posta <span class="zorunlu">*</span></label>
+                    <input type="email" id="email" placeholder="ornek@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label>Konu <span class="zorunlu">*</span></label>
+                    <select id="konu">
+                        <option value="">Konu seçin</option>
+                        <option value="Konut Satışı">Konut Satışı</option>
+                        <option value="Konut Kirası">Konut Kirası</option>
+                        <option value="Arsa Satışı">Arsa Satışı</option>
+                        <option value="İş Yeri">İş Yeri / Dükkan</option>
+                        <option value="Emlak Değerleme">Emlak Değerleme</option>
+                        <option value="Diğer">Diğer</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Mesajınız <span class="zorunlu">*</span></label>
+                    <textarea id="mesaj" rows="5" placeholder="Size nasıl yardımcı olabiliriz?"></textarea>
+                </div>
+
+                <div id="form-mesaj" style="display:none;" class="form-bildirim"></div>
+
+                <button class="iletisim-gonder-btn" onclick="formuGonder()">Mesaj Gönder</button>
+
+                <p class="gizlilik-notu">
+                    🔒 Gizlilik: Form aracılığıyla paylaştığınız kişisel bilgiler sadece size dönüş yapmak amacıyla
+                    kullanılacaktır. Bilgileriniz üçüncü şahıslarla paylaşılmayacaktır.
+                </p>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ORTAK FOOTER -->
+    <div id="footer-alani"></div>
+
+    <script>
+        async function formuGonder() {
+            const ad_soyad = document.getElementById('ad_soyad').value.trim();
+            const telefon = document.getElementById('telefon').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const konu = document.getElementById('konu').value;
+            const mesaj = document.getElementById('mesaj').value.trim();
+
+            if (!ad_soyad || !telefon || !email || !konu || !mesaj) {
+                bildirimGoster('❌ Lütfen tüm zorunlu alanları doldurun!', 'hata');
+                return;
+            }
+
+            bildirimGoster('✅ Mesajınız alındı! En kısa sürede size dönüş yapacağız.', 'basari');
+
+            ['ad_soyad', 'telefon', 'email', 'mesaj'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            document.getElementById('konu').value = '';
+        }
+
+        function bildirimGoster(metin, tip) {
+            const el = document.getElementById('form-mesaj');
+            el.textContent = metin;
+            el.style.display = 'block';
+            el.className = 'form-bildirim ' + (tip === 'basari' ? 'bildirim-basari' : 'bildirim-hata');
+            setTimeout(() => { el.style.display = 'none'; }, 5000);
+        }
+    </script>
+
+</body>
+
+</html>

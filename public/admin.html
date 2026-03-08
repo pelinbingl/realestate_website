@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Paneli | Emlak Durağı</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">
+            <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+                <img src="logo.jpeg" alt="Emlak Durağı Logo" class="logo-img">
+                <div class="logo-text">
+                    <span class="logo-main">EMLAK DURAĞI</span>
+                    <span class="logo-sub">Gayrimenkul Danışmanlığı</span>
+                </div>
+            </a>
+        </div>
+        <nav>
+            <a href="index.html">← Siteye Dön</a>
+        </nav>
+    </header>
+
+    <div class="admin-container">
+
+        <!-- SOL: FORM -->
+        <div class="admin-form-section">
+            <h2>➕ Yeni İlan Ekle</h2>
+
+            <div class="form-tip-secim">
+                <button class="form-tip-btn active-tip" onclick="formTipSec(this, 'ev')">🏠 Konut / Villa</button>
+                <button class="form-tip-btn" onclick="formTipSec(this, 'arsa')">🌿 Arsa / Tarla</button>
+            </div>
+
+            <!-- ORTAK ALANLAR -->
+            <div class="form-group">
+                <label>İlan Başlığı</label>
+                <input type="text" id="baslik" placeholder="örn: Satılık 2+1 Daire">
+            </div>
+
+            <div class="form-group">
+                <label>Konum</label>
+                <div style="display:flex;gap:8px;">
+                    <input type="text" id="konum" placeholder="örn: İzmir, Aliağa" style="flex:1;">
+                    <button type="button" onclick="haritaAc()" style="
+                        background:#f9e01a;color:#111;border:none;padding:10px 14px;
+                        border-radius:8px;cursor:pointer;font-weight:700;white-space:nowrap;">
+                        🗺️ Haritadan Seç
+                    </button>
+                </div>
+            </div>
+
+            <!-- HARİTA MODAL -->
+            <div id="harita-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+                background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;">
+                <div
+                    style="background:#fff;border-radius:16px;width:92%;max-width:750px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.5);">
+
+                    <!-- Başlık -->
+                    <div
+                        style="background:#111;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <span style="font-weight:700;font-size:16px;">🗺️ Haritadan Konum Seç</span>
+                            <p style="font-size:12px;color:#aaa;margin:2px 0 0;">Haritaya tıkla veya pini sürükle</p>
+                        </div>
+                        <button onclick="haritaKapat()"
+                            style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">✕</button>
+                    </div>
+
+                    <!-- Arama kutusu -->
+                    <div style="padding:12px 16px;border-bottom:1px solid #eee;display:flex;gap:8px;">
+                        <input type="text" id="harita-arama" placeholder="Adres, mahalle veya sokak ara..."
+                            style="flex:1;padding:10px 14px;border:2px solid #ddd;border-radius:8px;font-size:14px;outline:none;"
+                            onfocus="this.style.borderColor='#f9e01a'" onblur="this.style.borderColor='#ddd'">
+                        <button onclick="haritaAra()" style="
+                            background:#f9e01a;color:#111;border:none;padding:10px 20px;
+                            border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;">
+                            Ara
+                        </button>
+                    </div>
+
+                    <!-- Google Map -->
+                    <div id="google-map" style="width:100%;height:420px;"></div>
+
+                    <!-- Seçilen adres - DÜZENLENEBİLİR INPUT -->
+                    <div style="padding:14px 16px;background:#f9f9f9;border-top:1px solid #eee;">
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <div style="flex:1;">
+                                <p style="font-size:11px;color:#999;margin:0 0 6px;">Seçilen Konum: <span
+                                        style="color:#f9a01a;">(düzenleyebilirsiniz)</span></p>
+                                <input type="text" id="secilen-adres"
+                                    placeholder="📍 Haritaya tıklayarak konum seçin veya buraya yazın..."
+                                    style="width:100%;padding:9px 12px;border:2px solid #ddd;border-radius:8px;
+                                           font-size:14px;font-weight:600;color:#111;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#f9e01a'"
+                                    onblur="this.style.borderColor='#ddd'"
+                                    oninput="seciliAdres=this.value; btnAktifGuncelle();">
+                            </div>
+                            <button onclick="konumuOnayla()" id="onayla-btn" disabled style="
+                                background:#ccc;color:#fff;border:none;padding:12px 24px;
+                                border-radius:8px;cursor:not-allowed;font-weight:700;font-size:14px;
+                                transition:all 0.2s;white-space:nowrap;">
+                                ✅ Seç
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Fiyat (₺, sadece rakam)</label>
+                <input type="number" id="fiyat" placeholder="örn: 2500000">
+            </div>
+
+            <div class="form-group" id="tip-group">
+                <label>İlan Tipi</label>
+                <select id="tip">
+                    <option value="satilik">Satılık</option>
+                    <option value="kiralik">Kiralık</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Metrekare (m²)</label>
+                <input type="number" id="metrekare" placeholder="örn: 120">
+            </div>
+
+            <!-- EV ALANLARI -->
+            <div id="ev-alanlari">
+                <div class="form-group">
+                    <label>Emlak Tipi</label>
+                    <select id="emlak_tipi_ev">
+                        <option value="Konut">Daire / Konut</option>
+                        <option value="Villa">Villa</option>
+                        <option value="Müstakil">Müstakil Ev</option>
+                        <option value="Residence">Residence</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Oda Sayısı</label>
+                    <select id="oda">
+                        <option value="1+1">1+1</option>
+                        <option value="2+1">2+1</option>
+                        <option value="3+1">3+1</option>
+                        <option value="4+1">4+1</option>
+                        <option value="5+1">5+1</option>
+                        <option value="6+1">6+1</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Banyo Sayısı</label>
+                    <select id="banyo">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4+</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Kat</label>
+                    <input type="text" id="kat" placeholder="örn: 3. Kat veya Giriş Kat">
+                </div>
+                <div class="form-group">
+                    <label>Bina Yaşı</label>
+                    <select id="bina_yasi">
+                        <option value="Sıfır">Sıfır (0)</option>
+                        <option value="1-5 Yaş">1-5 Yaş</option>
+                        <option value="6-10 Yaş">6-10 Yaş</option>
+                        <option value="11-20 Yaş">11-20 Yaş</option>
+                        <option value="20+ Yaş">20+ Yaş</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Isıtma</label>
+                    <select id="isitma">
+                        <option value="Kombi">Kombi</option>
+                        <option value="Merkezi">Merkezi</option>
+                        <option value="Klima">Klima</option>
+                        <option value="Soba">Soba</option>
+                        <option value="Yok">Yok</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Teras</label>
+                    <select id="teras">
+                        <option value="Yok">Yok</option>
+                        <option value="Var">Var</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Balkon</label>
+                    <select id="balkon">
+                        <option value="Var">Var</option>
+                        <option value="Yok">Yok</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Eşya Durumu</label>
+                    <select id="esyali">
+                        <option value="Eşyasız">Eşyasız</option>
+                        <option value="Eşyalı">Eşyalı</option>
+                        <option value="Yarı Eşyalı">Yarı Eşyalı</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Site İçinde mi?</label>
+                    <select id="site">
+                        <option value="Hayır">Hayır</option>
+                        <option value="Evet">Evet</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Özellikler</label>
+                    <div class="ozellikler-grid">
+                        <label class="checkbox-label"><input type="checkbox" id="otopark" value="Otopark"> 🚗
+                            Otopark</label>
+                        <label class="checkbox-label"><input type="checkbox" id="asansor" value="Asansör"> 🛗
+                            Asansör</label>
+                        <label class="checkbox-label"><input type="checkbox" id="balkon_cb" value="Balkon"> 🪟
+                            Balkon</label>
+                        <label class="checkbox-label"><input type="checkbox" id="bahce" value="Bahçe"> 🌿 Bahçe</label>
+                        <label class="checkbox-label"><input type="checkbox" id="havuz" value="Havuz"> 🏊 Havuz</label>
+                        <label class="checkbox-label"><input type="checkbox" id="esyali_cb" value="Eşyalı"> 🛋
+                            Eşyalı</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ARSA ALANLARI -->
+            <div id="arsa-alanlari" style="display:none;">
+                <div class="form-group">
+                    <label>Arsa Tipi</label>
+                    <select id="emlak_tipi_arsa">
+                        <option value="Arsa">Arsa</option>
+                        <option value="Tarla">Tarla</option>
+                        <option value="Bağ & Bahçe">Bağ & Bahçe</option>
+                        <option value="Zeytinlik">Zeytinlik</option>
+                        <option value="Çiftlik">Çiftlik</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>İmar Durumu</label>
+                    <select id="imar">
+                        <option value="İmarlı">İmarlı</option>
+                        <option value="İmarsız">İmarsız</option>
+                        <option value="Tarım">Tarım Arazisi</option>
+                        <option value="Belirsiz">Belirsiz</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ada / Parsel (opsiyonel)</label>
+                    <input type="text" id="ada_parsel" placeholder="örn: Ada: 123, Parsel: 45">
+                </div>
+                <div class="form-group">
+                    <label>Cephe</label>
+                    <select id="cephe">
+                        <option value="">— Seçiniz —</option>
+                        <option value="Yola Cepheli">Yola Cepheli</option>
+                        <option value="Denize Cepheli">Denize Cepheli</option>
+                        <option value="Köşe Parsel">Köşe Parsel</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Krediye Uygunluk</label>
+                    <select id="kredi_uygunluk">
+                        <option value="Evet">Evet</option>
+                        <option value="Hayır">Hayır</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Takas</label>
+                    <select id="takas">
+                        <option value="Kabul">Kabul</option>
+                        <option value="Kabul Edilmez">Kabul Edilmez</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- RESİM YÜKLEME -->
+            <div class="form-group">
+                <label>Fotoğraflar (max 10 adet)</label>
+                <div class="resim-yukle-alan" id="resim-yukle-alan"
+                    onclick="document.getElementById('resim-input').click()" ondragover="surukle(event)"
+                    ondrop="birak(event)">
+                    <span style="font-size:32px;">📸</span>
+                    <p>Fotoğraf eklemek için tıkla veya sürükle bırak</p>
+                    <span style="font-size:12px;color:#aaa;">JPG, PNG, WEBP — Max 5MB</span>
+                </div>
+                <input type="file" id="resim-input" multiple accept="image/*" style="display:none"
+                    onchange="resimSecildi(this.files)">
+                <div class="onizleme-grid" id="onizleme-grid"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Açıklama (opsiyonel)</label>
+                <textarea id="aciklama" rows="3" placeholder="İlan hakkında kısa açıklama..."></textarea>
+            </div>
+
+            <div id="mesaj" class="admin-mesaj" style="display:none;"></div>
+
+            <div id="yuklenme-durumu" style="display:none;margin-bottom:12px;">
+                <div style="background:#eee;border-radius:6px;overflow:hidden;">
+                    <div id="progress-bar" style="height:8px;background:#f9e01a;width:0%;transition:width 0.3s;"></div>
+                </div>
+                <p style="font-size:13px;color:#777;margin-top:6px;" id="yuklenme-metin">Resimler yükleniyor...</p>
+            </div>
+
+            <button class="admin-btn" onclick="ilanEkle()">➕ İlanı Ekle</button>
+        </div>
+
+        <!-- SAĞ: MEVCUT İLANLAR -->
+        <div class="admin-list-section">
+            <h2>📋 Mevcut İlanlar</h2>
+            <div id="admin-ilanlar">
+                <p style="color:#999;font-size:14px;">Yükleniyor...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let aktifFormTip = 'ev';
+        let seciliDosyalar = [];
+        let googleMap = null;
+        let marker = null;
+        let geocoder = null;
+        let seciliAdres = '';
+        let autocomplete = null;
+
+        // === GOOGLE MAPS API KEY'İ SUNUCUDAN ÇEK ===
+        async function googleMapsYukle() {
+            try {
+                const cevap = await fetch('/api/config');
+                const config = await cevap.json();
+                const script = document.createElement('script');
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${config.googleMapsKey}&libraries=places&language=tr`;
+                document.head.appendChild(script);
+            } catch (hata) {
+                console.error('Google Maps yüklenemedi:', hata);
+            }
+        }
+        googleMapsYukle();
+
+        // === BUTON AKTİF/PASİF ===
+        function btnAktifGuncelle() {
+            const deger = document.getElementById('secilen-adres').value.trim();
+            const btn = document.getElementById('onayla-btn');
+            if (deger) {
+                btn.disabled = false;
+                btn.style.background = '#111';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.disabled = true;
+                btn.style.background = '#ccc';
+                btn.style.cursor = 'not-allowed';
+            }
+        }
+
+        // === HARİTA MODAL AÇ ===
+        function haritaAc() {
+            const modal = document.getElementById('harita-modal');
+            modal.style.display = 'flex';
+
+            if (!googleMap) {
+                setTimeout(() => { haritaOlustur(); }, 300);
+            } else {
+                const mevcutKonum = document.getElementById('konum').value.trim();
+                if (mevcutKonum) konumaGit(mevcutKonum);
+            }
+        }
+
+        // === HARİTA OLUŞTUR ===
+        function haritaOlustur() {
+            if (typeof google === 'undefined') {
+                setTimeout(() => { haritaOlustur(); }, 300);
+                return;
+            }
+
+            geocoder = new google.maps.Geocoder();
+            const merkez = { lat: 38.8028, lng: 26.9736 };
+
+            googleMap = new google.maps.Map(document.getElementById('google-map'), {
+                center: merkez,
+                zoom: 13,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false,
+                language: 'tr'
+            });
+
+            marker = new google.maps.Marker({
+                position: merkez,
+                map: googleMap,
+                draggable: true,
+                animation: google.maps.Animation.DROP,
+                title: 'Konumu sürükleyerek taşıyabilirsiniz'
+            });
+
+            marker.addListener('dragend', () => {
+                const pos = marker.getPosition();
+                koordinattenAdresAl(pos.lat(), pos.lng());
+            });
+
+            googleMap.addListener('click', (e) => {
+                marker.setPosition(e.latLng);
+                koordinattenAdresAl(e.latLng.lat(), e.latLng.lng());
+            });
+
+            autocomplete = new google.maps.places.Autocomplete(
+                document.getElementById('harita-arama'),
+                { componentRestrictions: { country: 'tr' } }
+            );
+
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (!place.geometry) return;
+                googleMap.setCenter(place.geometry.location);
+                googleMap.setZoom(16);
+                marker.setPosition(place.geometry.location);
+                adresGuncelle(place.formatted_address || place.name);
+            });
+
+            const mevcutKonum = document.getElementById('konum').value.trim();
+            if (mevcutKonum) konumaGit(mevcutKonum);
+        }
+
+        // === KOORDİNATTAN ADRES AL ===
+        function koordinattenAdresAl(lat, lng) {
+            if (!geocoder) return;
+            geocoder.geocode({ location: { lat, lng }, language: 'tr' }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    adresGuncelle(results[0].formatted_address);
+                }
+            });
+        }
+
+        // === ADRES GÜNCELLE ===
+        function adresGuncelle(adres) {
+            seciliAdres = adres;
+            document.getElementById('secilen-adres').value = adres;
+            btnAktifGuncelle();
+        }
+
+        // === METİN İLE ARA ===
+        function haritaAra() {
+            const aranan = document.getElementById('harita-arama').value.trim();
+            if (!aranan) return;
+            konumaGit(aranan);
+        }
+
+        function konumaGit(adres) {
+            if (!geocoder) geocoder = new google.maps.Geocoder();
+            const sorgu = adres.toLowerCase().includes('türkiye') ? adres : adres + ', Türkiye';
+            geocoder.geocode({ address: sorgu, language: 'tr' }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    const konum = results[0].geometry.location;
+                    googleMap.setCenter(konum);
+                    googleMap.setZoom(16);
+                    marker.setPosition(konum);
+                    adresGuncelle(results[0].formatted_address);
+                }
+            });
+        }
+
+        // === KONUMU ONAYLA ===
+        function konumuOnayla() {
+            const adres = document.getElementById('secilen-adres').value.trim();
+            if (!adres) return;
+            document.getElementById('konum').value = adres;
+            haritaKapat();
+        }
+
+        // === HARİTA KAPAT ===
+        function haritaKapat() {
+            document.getElementById('harita-modal').style.display = 'none';
+        }
+
+        document.getElementById('harita-modal').addEventListener('click', function (e) {
+            if (e.target === this) haritaKapat();
+        });
+
+        // === FORM TİPİ SEÇ ===
+        function formTipSec(buton, tip) {
+            aktifFormTip = tip;
+            document.querySelectorAll('.form-tip-btn').forEach(b => b.classList.remove('active-tip'));
+            buton.classList.add('active-tip');
+            document.getElementById('ev-alanlari').style.display = tip === 'ev' ? 'block' : 'none';
+            document.getElementById('arsa-alanlari').style.display = tip === 'arsa' ? 'block' : 'none';
+            const tipGroup = document.getElementById('tip-group');
+            if (tip === 'arsa') {
+                document.getElementById('tip').value = 'satilik';
+                tipGroup.style.display = 'none';
+            } else {
+                tipGroup.style.display = 'block';
+            }
+        }
+
+        // === SÜRÜKLE-BIRAK ===
+        function surukle(e) {
+            e.preventDefault();
+            document.getElementById('resim-yukle-alan').style.borderColor = '#f9e01a';
+        }
+
+        function birak(e) {
+            e.preventDefault();
+            document.getElementById('resim-yukle-alan').style.borderColor = '#ddd';
+            resimSecildi(e.dataTransfer.files);
+        }
+
+        // === RESİM SEÇİLDİ ===
+        function resimSecildi(dosyalar) {
+            const yeniDosyalar = Array.from(dosyalar);
+            if (seciliDosyalar.length + yeniDosyalar.length > 10) {
+                alert('En fazla 10 fotoğraf ekleyebilirsiniz!');
+                return;
+            }
+            seciliDosyalar = [...seciliDosyalar, ...yeniDosyalar];
+            onizlemeGoster();
+        }
+
+        // === ÖNİZLEME ===
+        function onizlemeGoster() {
+            const grid = document.getElementById('onizleme-grid');
+            grid.innerHTML = seciliDosyalar.map((dosya, index) => {
+                const url = URL.createObjectURL(dosya);
+                return `
+                    <div class="onizleme-kart" id="onizleme-${index}">
+                        <img src="${url}" alt="Önizleme ${index + 1}">
+                        <button class="onizleme-sil" onclick="resimSil(${index})">✕</button>
+                        ${index === 0 ? '<span class="ana-resim-etiket">Ana Resim</span>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function resimSil(index) {
+            seciliDosyalar.splice(index, 1);
+            onizlemeGoster();
+        }
+
+        // === İLAN EKLE ===
+        async function ilanEkle() {
+            const baslik = document.getElementById('baslik').value.trim();
+            const konum = document.getElementById('konum').value.trim();
+            const fiyat = Number(document.getElementById('fiyat').value);
+            const tip = document.getElementById('tip').value;
+            const metrekare = Number(document.getElementById('metrekare').value);
+            const aciklama = document.getElementById('aciklama').value.trim();
+
+            if (!baslik || !konum || !fiyat || !metrekare) {
+                mesajGoster('❌ Başlık, konum, fiyat ve metrekare zorunludur!', 'hata');
+                return;
+            }
+            if (seciliDosyalar.length === 0) {
+                mesajGoster('❌ En az 1 fotoğraf ekleyin!', 'hata');
+                return;
+            }
+
+            let resimUrls = [];
+            try {
+                resimUrls = await resimleriYukle();
+            } catch (hata) {
+                mesajGoster('❌ Resim yüklenirken hata: ' + hata.message, 'hata');
+                return;
+            }
+
+            let yeniIlan = {
+                baslik, konum, fiyat, tip, metrekare, aciklama,
+                resim: resimUrls[0],
+                resimler: resimUrls
+            };
+
+            if (aktifFormTip === 'ev') {
+                const ozellikler = [];
+                ['otopark', 'asansor', 'balkon_cb', 'bahce', 'havuz', 'esyali_cb'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.checked) ozellikler.push(el.value);
+                });
+                yeniIlan.emlak_tipi = document.getElementById('emlak_tipi_ev').value;
+                yeniIlan.oda = document.getElementById('oda').value;
+                yeniIlan.banyo = document.getElementById('banyo').value;
+                yeniIlan.kat = document.getElementById('kat').value;
+                yeniIlan.bina_yasi = document.getElementById('bina_yasi').value;
+                yeniIlan.isitma = document.getElementById('isitma').value;
+                yeniIlan.teras = document.getElementById('teras').value;
+                yeniIlan.balkon = document.getElementById('balkon').value;
+                yeniIlan.esyali = document.getElementById('esyali').value;
+                yeniIlan.site = document.getElementById('site').value;
+                yeniIlan.ozellikler = ozellikler.join(', ');
+            } else {
+                yeniIlan.emlak_tipi = document.getElementById('emlak_tipi_arsa').value;
+                yeniIlan.imar = document.getElementById('imar').value;
+                yeniIlan.ada_parsel = document.getElementById('ada_parsel').value;
+                yeniIlan.cephe = document.getElementById('cephe').value;
+                yeniIlan.kredi_uygunluk = document.getElementById('kredi_uygunluk').value;
+                yeniIlan.takas = document.getElementById('takas').value;
+                yeniIlan.oda = null;
+                yeniIlan.tip = 'satilik';
+            }
+
+            try {
+                const cevap = await fetch('/api/ilanlar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(yeniIlan)
+                });
+                const sonuc = await cevap.json();
+                if (cevap.ok) {
+                    mesajGoster('✅ İlan başarıyla eklendi!', 'basari');
+                    formuTemizle();
+                    adminIlanlariYukle();
+                } else {
+                    mesajGoster('❌ ' + sonuc.hata, 'hata');
+                }
+            } catch (hata) {
+                mesajGoster('❌ Sunucu bağlantı hatası!', 'hata');
+            }
+        }
+
+        // === RESİMLERİ YÜKLE ===
+        async function resimleriYukle() {
+            const formData = new FormData();
+            seciliDosyalar.forEach(dosya => formData.append('resimler', dosya));
+
+            document.getElementById('yuklenme-durumu').style.display = 'block';
+            document.getElementById('progress-bar').style.width = '30%';
+            document.getElementById('yuklenme-metin').textContent = 'Resimler yükleniyor...';
+
+            const cevap = await fetch('/api/resim-yukle', { method: 'POST', body: formData });
+            document.getElementById('progress-bar').style.width = '100%';
+            if (!cevap.ok) throw new Error('Resim yükleme başarısız');
+
+            const sonuc = await cevap.json();
+            setTimeout(() => {
+                document.getElementById('yuklenme-durumu').style.display = 'none';
+                document.getElementById('progress-bar').style.width = '0%';
+            }, 1000);
+            return sonuc.urls;
+        }
+
+        // === İLANLARI LİSTELE ===
+        document.addEventListener('DOMContentLoaded', () => {
+            adminIlanlariYukle();
+        });
+
+        async function adminIlanlariYukle() {
+            const cevap = await fetch('/api/ilanlar');
+            const ilanlar = await cevap.json();
+            const container = document.getElementById('admin-ilanlar');
+
+            if (ilanlar.length === 0) {
+                container.innerHTML = '<p style="color:#999;font-size:14px;">Henüz ilan yok.</p>';
+                return;
+            }
+
+            container.innerHTML = ilanlar.map(ilan => `
+                <div class="admin-ilan-satir">
+                    <div style="display:flex;gap:12px;align-items:center;">
+                        <img src="${ilan.resim || 'https://via.placeholder.com/60x45'}" alt=""
+                             style="width:60px;height:45px;object-fit:cover;border-radius:4px;">
+                        <div class="admin-ilan-bilgi">
+                            <strong>${ilan.baslik}</strong>
+                            <span>📍 ${ilan.konum}</span>
+                            <div style="display:flex;gap:6px;margin-top:4px;">
+                                <span class="badge ${ilan.tip === 'kiralik' ? 'kiralik-badge' : 'satilik-badge'}">
+                                    ${ilan.tip === 'kiralik' ? 'Kiralık' : 'Satılık'}
+                                </span>
+                                <span style="background:#eee;color:#555;padding:3px 8px;border-radius:4px;font-size:11px;">
+                                    ${ilan.emlak_tipi}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="sil-btn" onclick="ilanSil(${ilan.id})">🗑 Sil</button>
+                </div>
+            `).join('');
+        }
+
+        // === İLAN SİL ===
+        async function ilanSil(id) {
+            if (!confirm('Bu ilanı silmek istediğinize emin misiniz?')) return;
+            const cevap = await fetch(`/api/ilanlar/${id}`, { method: 'DELETE' });
+            if (cevap.ok) {
+                mesajGoster('✅ İlan silindi!', 'basari');
+                adminIlanlariYukle();
+            }
+        }
+
+        // === MESAJ ===
+        function mesajGoster(metin, tip) {
+            const el = document.getElementById('mesaj');
+            el.textContent = metin;
+            el.style.display = 'block';
+            el.className = 'admin-mesaj ' + (tip === 'basari' ? 'mesaj-basari' : 'mesaj-hata');
+            setTimeout(() => { el.style.display = 'none'; }, 3000);
+        }
+
+        // === FORMU TEMİZLE ===
+        function formuTemizle() {
+            ['baslik', 'konum', 'fiyat', 'metrekare', 'aciklama', 'kat', 'ada_parsel'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            ['otopark', 'asansor', 'balkon_cb', 'bahce', 'havuz', 'esyali_cb'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.checked = false;
+            });
+            seciliDosyalar = [];
+            seciliAdres = '';
+            document.getElementById('onizleme-grid').innerHTML = '';
+            document.getElementById('resim-input').value = '';
+            document.getElementById('harita-arama').value = '';
+            document.getElementById('secilen-adres').value = '';
+            const btn = document.getElementById('onayla-btn');
+            btn.disabled = true;
+            btn.style.background = '#ccc';
+            btn.style.cursor = 'not-allowed';
+        }
+    </script>
+
+</body>
+
+</html>

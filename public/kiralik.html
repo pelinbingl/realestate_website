@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiralık İlanlar | Emlak Durağı</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="components.js"></script>
+</head>
+
+<body>
+
+    <!-- ORTAK HEADER -->
+    <div id="header-alani"></div>
+
+    <div class="liste-container">
+
+        <!-- SOL: FİLTRE PANELİ -->
+        <div class="filtre-panel">
+
+            <div class="filtre-baslik">
+                <span>Filtreler</span>
+                <button onclick="filtreleriTemizle()">Temizle</button>
+            </div>
+
+            <div class="filtre-grup">
+                <label>İlan Türü</label>
+                <div class="filtre-ilan-turu">Kiralık</div>
+            </div>
+
+            <div class="filtre-grup">
+                <label>Emlak Türü</label>
+                <select id="f-emlak-turu">
+                    <option value="">Tümü</option>
+                    <option value="Konut">Konut / Daire</option>
+                    <option value="Villa">Villa</option>
+                    <option value="Müstakil">Müstakil Ev</option>
+                    <option value="Residence">Residence</option>
+                    <option value="İşyeri">İşyeri</option>
+                </select>
+            </div>
+
+            <div class="filtre-grup">
+                <label>Oda Sayısı</label>
+                <select id="f-oda">
+                    <option value="">Tümü</option>
+                    <option value="1+1">1+1</option>
+                    <option value="2+1">2+1</option>
+                    <option value="3+1">3+1</option>
+                    <option value="4+1">4+1</option>
+                    <option value="5+1">5+1</option>
+                </select>
+            </div>
+
+            <div class="filtre-grup">
+                <label>Fiyat Aralığı (₺)</label>
+                <div class="fiyat-aralik">
+                    <input type="number" id="f-min-fiyat" placeholder="Min">
+                    <span>—</span>
+                    <input type="number" id="f-max-fiyat" placeholder="Max">
+                </div>
+            </div>
+
+            <div class="filtre-grup">
+                <label>Min m²</label>
+                <input type="number" id="f-min-m2" placeholder="örn: 80">
+            </div>
+
+            <button class="filtre-btn" onclick="filtreUygula()">🔍 Filtrele</button>
+
+        </div>
+
+        <!-- SAĞ: İLAN LİSTESİ -->
+        <div class="liste-icerik">
+
+            <div class="liste-baslik-bar">
+                <h1>Kiralık İlanlar</h1>
+                <span id="ilan-sayisi" class="ilan-sayisi">Yükleniyor...</span>
+            </div>
+
+            <div class="liste-grid" id="liste-grid"></div>
+
+            <div id="bos-mesaj" style="display:none;" class="bos-mesaj">
+                <span>😕</span>
+                <p>Filtrelere uygun ilan bulunamadı.</p>
+                <button onclick="filtreleriTemizle()">Filtreleri Temizle</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ORTAK FOOTER -->
+    <div id="footer-alani"></div>
+
+    <script>
+        let tumIlanlar = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            ilanlariYukle();
+        });
+
+        async function ilanlariYukle() {
+            try {
+                const cevap = await fetch('/api/ilanlar?tip=kiralik');
+                tumIlanlar = await cevap.json();
+                ilanlariGoster(tumIlanlar);
+            } catch (hata) {
+                console.error('Hata:', hata);
+            }
+        }
+
+        function ilanlariGoster(ilanlar) {
+            const grid = document.getElementById('liste-grid');
+            const sayiEl = document.getElementById('ilan-sayisi');
+            const bosEl = document.getElementById('bos-mesaj');
+
+            sayiEl.textContent = ilanlar.length + ' ilan bulundu';
+
+            if (ilanlar.length === 0) {
+                grid.innerHTML = '';
+                bosEl.style.display = 'flex';
+                return;
+            }
+
+            bosEl.style.display = 'none';
+
+            grid.innerHTML = ilanlar.map(ilan => {
+                const fiyat = `₺${ilan.fiyat.toLocaleString('tr-TR')} / ay`;
+                const odaBilgi = ilan.oda ? `<span>⊞ ${ilan.oda}</span>` : '';
+                const m2Bilgi = ilan.metrekare ? `<span>⊡ ${ilan.metrekare} m²</span>` : '';
+                const resim = ilan.resim || 'https://via.placeholder.com/400x250?text=Resim+Yok';
+
+                return `
+                    <div class="liste-kart" onclick="window.location.href='ilan-detay.html?id=${ilan.id}'">
+                        <div class="liste-kart-resim">
+                            <img src="${resim}" alt="${ilan.baslik}">
+                            <span class="liste-tip-badge">${ilan.emlak_tipi}</span>
+                        </div>
+                        <div class="liste-kart-bilgi">
+                            <h3>${ilan.baslik}</h3>
+                            <p class="liste-konum">📍 ${ilan.konum}</p>
+                            <div class="liste-detaylar">
+                                ${odaBilgi}
+                                ${m2Bilgi}
+                            </div>
+                            <div class="liste-fiyat">${fiyat}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filtreUygula() {
+            const emlakTuru = document.getElementById('f-emlak-turu').value;
+            const oda = document.getElementById('f-oda').value;
+            const minFiyat = Number(document.getElementById('f-min-fiyat').value) || 0;
+            const maxFiyat = Number(document.getElementById('f-max-fiyat').value) || Infinity;
+            const minM2 = Number(document.getElementById('f-min-m2').value) || 0;
+
+            const filtrelenmis = tumIlanlar.filter(ilan => {
+                if (emlakTuru && ilan.emlak_tipi !== emlakTuru) return false;
+                if (oda && ilan.oda !== oda) return false;
+                if (ilan.fiyat < minFiyat || ilan.fiyat > maxFiyat) return false;
+                if (ilan.metrekare < minM2) return false;
+                return true;
+            });
+
+            ilanlariGoster(filtrelenmis);
+        }
+
+        function filtreleriTemizle() {
+            document.getElementById('f-emlak-turu').value = '';
+            document.getElementById('f-oda').value = '';
+            document.getElementById('f-min-fiyat').value = '';
+            document.getElementById('f-max-fiyat').value = '';
+            document.getElementById('f-min-m2').value = '';
+            ilanlariGoster(tumIlanlar);
+        }
+    </script>
+
+</body>
+
+</html>

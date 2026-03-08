@@ -4,7 +4,7 @@ function headerYukle() {
 
   const header = `
     <div class="topbar">
-      <span>📞 0232 000 00 00</span>
+      <span>📞 0232 655 84 84 &nbsp;|&nbsp; 📞 0534 540 64 64</span>
       <span>✉️ info@emlakduragi.com</span>
       <span>🕐 Hafta içi 09:00 - 18:00</span>
     </div>
@@ -12,18 +12,18 @@ function headerYukle() {
     <header>
       <div class="logo">
         <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
-  <img src="logo.jpeg" alt="Emlak Durağı Logo" class="logo-img">
-  <div class="logo-text">
-    <span class="logo-main">EMLAK DURAĞI</span>
-    <span class="logo-sub">Gayrimenkul Danışmanlığı</span>
-  </div>
-</a>
+          <img src="logo.jpeg" alt="Emlak Durağı Logo" class="logo-img">
+          <div class="logo-text">
+            <span class="logo-main">EMLAK DURAĞI</span>
+            <span class="logo-sub">Gayrimenkul Danışmanlığı</span>
+          </div>
+        </a>
       </div>
       <nav>
-        <a href="index.html"     class="${mevcutSayfa === 'index.html'      ? 'active' : ''}">Ana Sayfa</a>
-        <a href="kiralik.html"   class="${mevcutSayfa === 'kiralik.html'    ? 'active' : ''}">Kiralık</a>
-        <a href="satilik.html"   class="${mevcutSayfa === 'satilik.html'    ? 'active' : ''}">Satılık</a>
-        <a href="iletisim.html"  class="${mevcutSayfa === 'iletisim.html'   ? 'active' : ''}">İletişim</a>
+        <a href="index.html"      class="${mevcutSayfa === 'index.html'      ? 'active' : ''}">Ana Sayfa</a>
+        <a href="kiralik.html"    class="${mevcutSayfa === 'kiralik.html'    ? 'active' : ''}">Kiralık</a>
+        <a href="satilik.html"    class="${mevcutSayfa === 'satilik.html'    ? 'active' : ''}">Satılık</a>
+        <a href="iletisim.html"   class="${mevcutSayfa === 'iletisim.html'   ? 'active' : ''}">İletişim</a>
         <a href="hakkimizda.html" class="${mevcutSayfa === 'hakkimizda.html' ? 'active' : ''}">Hakkımızda</a>
       </nav>
     </header>
@@ -63,7 +63,8 @@ function footerYukle() {
         <div class="footer-col">
           <h3>İletişim</h3>
           <p>📍 Kültür Mah. İstiklal Cad.<br>Orkide Apt. No:5/C Aliağa/İzmir</p>
-          <p>📞 0232 000 00 00</p>
+          <p>📞 0232 655 84 84</p>
+          <p>📞 0534 540 64 64</p>
           <p>✉️ info@emlakduragi.com</p>
         </div>
       </div>

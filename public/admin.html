@@ -10,6 +10,30 @@
 
 <body>
 
+    <!-- ŞİFRE EKRANI -->
+    <div id="sifre-ekrani" style="
+        position:fixed;top:0;left:0;width:100%;height:100%;
+        background:#111;z-index:99999;display:flex;
+        align-items:center;justify-content:center;">
+        <div
+            style="background:#fff;border-radius:16px;padding:40px;width:360px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.5);">
+            <img src="logo.jpeg" alt="Logo" style="width:80px;border-radius:50%;margin-bottom:16px;">
+            <h2 style="margin:0 0 8px;color:#111;">Admin Paneli</h2>
+            <p style="color:#999;font-size:14px;margin-bottom:24px;">Devam etmek için şifrenizi girin</p>
+            <input type="password" id="sifre-input" placeholder="Şifre" style="width:100%;padding:12px 16px;border:2px solid #ddd;border-radius:8px;
+                       font-size:16px;outline:none;box-sizing:border-box;margin-bottom:12px;"
+                onfocus="this.style.borderColor='#f9e01a'" onblur="this.style.borderColor='#ddd'"
+                onkeydown="if(event.key==='Enter') sifreKontrol()">
+            <button onclick="sifreKontrol()" style="
+                width:100%;background:#f9e01a;color:#111;border:none;
+                padding:13px;border-radius:8px;font-size:16px;
+                font-weight:700;cursor:pointer;">Giriş Yap</button>
+            <p id="sifre-hata" style="color:red;font-size:13px;margin-top:10px;display:none;">
+                ❌ Hatalı şifre!
+            </p>
+        </div>
+    </div>
+
     <header>
         <div class="logo">
             <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
@@ -36,7 +60,6 @@
                 <button class="form-tip-btn" onclick="formTipSec(this, 'arsa')">🌿 Arsa / Tarla</button>
             </div>
 
-            <!-- ORTAK ALANLAR -->
             <div class="form-group">
                 <label>İlan Başlığı</label>
                 <input type="text" id="baslik" placeholder="örn: Satılık 2+1 Daire">
@@ -59,8 +82,6 @@
                 background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;">
                 <div
                     style="background:#fff;border-radius:16px;width:92%;max-width:750px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.5);">
-
-                    <!-- Başlık -->
                     <div
                         style="background:#111;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
                         <div>
@@ -70,23 +91,15 @@
                         <button onclick="haritaKapat()"
                             style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">✕</button>
                     </div>
-
-                    <!-- Arama kutusu -->
                     <div style="padding:12px 16px;border-bottom:1px solid #eee;display:flex;gap:8px;">
                         <input type="text" id="harita-arama" placeholder="Adres, mahalle veya sokak ara..."
                             style="flex:1;padding:10px 14px;border:2px solid #ddd;border-radius:8px;font-size:14px;outline:none;"
                             onfocus="this.style.borderColor='#f9e01a'" onblur="this.style.borderColor='#ddd'">
                         <button onclick="haritaAra()" style="
                             background:#f9e01a;color:#111;border:none;padding:10px 20px;
-                            border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;">
-                            Ara
-                        </button>
+                            border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;">Ara</button>
                     </div>
-
-                    <!-- Google Map -->
                     <div id="google-map" style="width:100%;height:420px;"></div>
-
-                    <!-- Seçilen adres - DÜZENLENEBİLİR INPUT -->
                     <div style="padding:14px 16px;background:#f9f9f9;border-top:1px solid #eee;">
                         <div style="display:flex;gap:10px;align-items:center;">
                             <div style="flex:1;">
@@ -102,12 +115,9 @@
                             <button onclick="konumuOnayla()" id="onayla-btn" disabled style="
                                 background:#ccc;color:#fff;border:none;padding:12px 24px;
                                 border-radius:8px;cursor:not-allowed;font-weight:700;font-size:14px;
-                                transition:all 0.2s;white-space:nowrap;">
-                                ✅ Seç
-                            </button>
+                                transition:all 0.2s;white-space:nowrap;">✅ Seç</button>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -282,7 +292,8 @@
 
             <!-- RESİM YÜKLEME -->
             <div class="form-group">
-                <label>Fotoğraflar (max 10 adet)</label>
+                <label>Fotoğraflar (max 10 adet) — <span style="color:#f9a01a;font-size:13px;">Kapak için fotoğrafa
+                        tıkla</span></label>
                 <div class="resim-yukle-alan" id="resim-yukle-alan"
                     onclick="document.getElementById('resim-input').click()" ondragover="surukle(event)"
                     ondrop="birak(event)">
@@ -323,8 +334,33 @@
     </div>
 
     <script>
+        // === ŞİFRE KORUMA ===
+        let ADMIN_SIFRE = '';
+
+            fetch('/api/config')
+                .then(r => r.json())
+                .then(config => { ADMIN_SIFRE = config.adminSifre; }); // ← istediğin şifreyi buraya yaz
+
+        function sifreKontrol() {
+            const girilen = document.getElementById('sifre-input').value;
+            if (girilen === ADMIN_SIFRE) {
+                document.getElementById('sifre-ekrani').style.display = 'none';
+                sessionStorage.setItem('adminGiris', 'true');
+            } else {
+                document.getElementById('sifre-hata').style.display = 'block';
+                document.getElementById('sifre-input').value = '';
+                document.getElementById('sifre-input').focus();
+            }
+        }
+
+        if (sessionStorage.getItem('adminGiris') === 'true') {
+            document.getElementById('sifre-ekrani').style.display = 'none';
+        }
+
+        // === DEĞİŞKENLER ===
         let aktifFormTip = 'ev';
         let seciliDosyalar = [];
+        let anaResimIndex = 0;
         let googleMap = null;
         let marker = null;
         let geocoder = null;
@@ -364,7 +400,6 @@
         function haritaAc() {
             const modal = document.getElementById('harita-modal');
             modal.style.display = 'flex';
-
             if (!googleMap) {
                 setTimeout(() => { haritaOlustur(); }, 300);
             } else {
@@ -379,25 +414,17 @@
                 setTimeout(() => { haritaOlustur(); }, 300);
                 return;
             }
-
             geocoder = new google.maps.Geocoder();
             const merkez = { lat: 38.8028, lng: 26.9736 };
 
             googleMap = new google.maps.Map(document.getElementById('google-map'), {
-                center: merkez,
-                zoom: 13,
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false,
-                language: 'tr'
+                center: merkez, zoom: 13,
+                mapTypeControl: false, streetViewControl: false, fullscreenControl: false
             });
 
             marker = new google.maps.Marker({
-                position: merkez,
-                map: googleMap,
-                draggable: true,
-                animation: google.maps.Animation.DROP,
-                title: 'Konumu sürükleyerek taşıyabilirsiniz'
+                position: merkez, map: googleMap, draggable: true,
+                animation: google.maps.Animation.DROP
             });
 
             marker.addListener('dragend', () => {
@@ -428,24 +455,19 @@
             if (mevcutKonum) konumaGit(mevcutKonum);
         }
 
-        // === KOORDİNATTAN ADRES AL ===
         function koordinattenAdresAl(lat, lng) {
             if (!geocoder) return;
             geocoder.geocode({ location: { lat, lng }, language: 'tr' }, (results, status) => {
-                if (status === 'OK' && results[0]) {
-                    adresGuncelle(results[0].formatted_address);
-                }
+                if (status === 'OK' && results[0]) adresGuncelle(results[0].formatted_address);
             });
         }
 
-        // === ADRES GÜNCELLE ===
         function adresGuncelle(adres) {
             seciliAdres = adres;
             document.getElementById('secilen-adres').value = adres;
             btnAktifGuncelle();
         }
 
-        // === METİN İLE ARA ===
         function haritaAra() {
             const aranan = document.getElementById('harita-arama').value.trim();
             if (!aranan) return;
@@ -466,7 +488,6 @@
             });
         }
 
-        // === KONUMU ONAYLA ===
         function konumuOnayla() {
             const adres = document.getElementById('secilen-adres').value.trim();
             if (!adres) return;
@@ -474,7 +495,6 @@
             haritaKapat();
         }
 
-        // === HARİTA KAPAT ===
         function haritaKapat() {
             document.getElementById('harita-modal').style.display = 'none';
         }
@@ -522,16 +542,28 @@
             onizlemeGoster();
         }
 
+        // === KAPAK FOTOĞRAFI SEÇ ===
+        function anaResimSec(index) {
+            anaResimIndex = index;
+            onizlemeGoster();
+        }
+
         // === ÖNİZLEME ===
         function onizlemeGoster() {
             const grid = document.getElementById('onizleme-grid');
             grid.innerHTML = seciliDosyalar.map((dosya, index) => {
                 const url = URL.createObjectURL(dosya);
+                const kapakMi = index === anaResimIndex;
                 return `
-                    <div class="onizleme-kart" id="onizleme-${index}">
+                    <div class="onizleme-kart ${kapakMi ? 'ana-resim-secili' : ''}"
+                         id="onizleme-${index}"
+                         onclick="anaResimSec(${index})"
+                         style="cursor:pointer;">
                         <img src="${url}" alt="Önizleme ${index + 1}">
-                        <button class="onizleme-sil" onclick="resimSil(${index})">✕</button>
-                        ${index === 0 ? '<span class="ana-resim-etiket">Ana Resim</span>' : ''}
+                        <button class="onizleme-sil" onclick="event.stopPropagation(); resimSil(${index})">✕</button>
+                        <span class="ana-resim-etiket" style="${kapakMi ? '' : 'background:#999;'}">
+                            ${kapakMi ? '⭐ Kapak' : 'Kapak Seç'}
+                        </span>
                     </div>
                 `;
             }).join('');
@@ -539,6 +571,7 @@
 
         function resimSil(index) {
             seciliDosyalar.splice(index, 1);
+            if (anaResimIndex >= seciliDosyalar.length) anaResimIndex = 0;
             onizlemeGoster();
         }
 
@@ -568,10 +601,14 @@
                 return;
             }
 
+            const kapakUrl = resimUrls[anaResimIndex];
+            const digerResimler = resimUrls.filter((_, i) => i !== anaResimIndex);
+            const siraliResimler = [kapakUrl, ...digerResimler];
+
             let yeniIlan = {
                 baslik, konum, fiyat, tip, metrekare, aciklama,
-                resim: resimUrls[0],
-                resimler: resimUrls
+                resim: kapakUrl,
+                resimler: siraliResimler
             };
 
             if (aktifFormTip === 'ev') {
@@ -710,6 +747,7 @@
                 if (el) el.checked = false;
             });
             seciliDosyalar = [];
+            anaResimIndex = 0;
             seciliAdres = '';
             document.getElementById('onizleme-grid').innerHTML = '';
             document.getElementById('resim-input').value = '';

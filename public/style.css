@@ -1915,3 +1915,8 @@ footer {
 .harita-yonlendir-btn:hover {
     background: #e6cc00;
 }
+
+.ana-resim-secili {
+    border: 3px solid #f9e01a !important;
+    transform: scale(1.02);
+}

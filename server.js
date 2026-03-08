@@ -95,7 +95,8 @@ app.get('/api/ilanlar/:id', (req, res) => {
 // Yeni endpoint:
 app.get('/api/config', (req, res) => {
     res.json({ 
-        googleMapsKey: process.env.GOOGLE_MAPS_API_KEY 
+        googleMapsKey: process.env.GOOGLE_MAPS_API_KEY,
+        adminSifre: process.env.ADMIN_SIFRE
     });
 });
 // === YENİ İLAN EKLE ===

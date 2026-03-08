@@ -62,7 +62,7 @@ function footerYukle() {
         </div>
         <div class="footer-col">
           <h3>İletişim</h3>
-          <p>📍 Kültür Mah. İstiklal Cad.<br>Orkide Apt. No:5/C Aliağa/İzmir</p>
+          <p>📍 Kazım Dirik Mah. Atatürk Cad.<br>No:78/C Aliağa/İzmir</p>
           <p>📞 0232 655 84 84</p>
           <p>📞 0534 540 64 64</p>
           <p>✉️ info@emlakduragi.com</p>

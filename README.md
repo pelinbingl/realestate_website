@@ -2,6 +2,8 @@
 
 A full-stack web application built for **Emlak Durağı**, a real estate agency. The site allows visitors to browse property listings, while authorized admins can manage all listings through a secure panel.
 
+🌐 **Live Demo:** [emlak-duragi.onrender.com](https://emlak-duragi.onrender.com)
+
 ---
 
 ## 🚀 Features
@@ -66,6 +68,8 @@ Then open your browser and go to `http://localhost:3000`
 
 This project was built as a personal project to create a real-world property listing platform for a local real estate agency. It simulates a real agency website where only authorized admins can manage listings, while visitors can freely browse available properties.
 
+The application is **deployed and live** on Render: [emlak-duragi.onrender.com](https://emlak-duragi.onrender.com)
+
 ---
 
 ## 👩‍💻 Developer
@@ -78,6 +82,8 @@ This project was built as a personal project to create a real-world property lis
 # 🏠 Emlak Durağı – Emlak İlan Web Sitesi
 
 **Emlak Durağı** adlı emlak ofisi için geliştirilmiş full-stack bir web uygulaması. Ziyaretçiler mevcut ilanları görüntüleyebilirken, yetkili adminler tüm ilanları güvenli bir panel üzerinden yönetebilir.
+
+🌐 **Canlı Demo:** [emlak-duragi.onrender.com](https://emlak-duragi.onrender.com)
 
 ---
 
@@ -142,6 +148,8 @@ Tarayıcında `http://localhost:3000` adresine git.
 ## 💡 Hakkında
 
 Bu proje, yerel bir emlak ofisi için gerçek dünya senaryosuna uygun bir ilan platformu oluşturmak amacıyla kişisel proje olarak geliştirilmiştir. Yalnızca yetkili adminlerin ilan yönetimi yapabildiği, ziyaretçilerin ise ilanları serbestçe görüntüleyebildiği bir yapı sunar.
+
+Uygulama Render üzerinde **canlıya alınmıştır:** [emlak-duragi.onrender.com](https://emlak-duragi.onrender.com)
 
 ---
 

@@ -2,15 +2,12 @@ require('dotenv').config();
 
 const express = require('express');
 const multer  = require('multer');
-// Dosya yükleme kütüphanesi
 const path    = require('path');
-// Dosya yolu işlemleri için Node.js'in yerleşik modülü
 const fs      = require('fs');
-// Dosya sistemi işlemleri için Node.js'in yerleşik modülü
 const db      = require('./database');
 
 const app  = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -19,119 +16,95 @@ app.use(express.json());
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = 'public/uploads';
-    // Resimlerin kaydedileceği klasör
-
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-      // Klasör yoksa oluştur
-    }
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     const benzersizAd = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    // Benzersiz dosya adı: timestamp + rastgele sayı
-    const uzanti = path.extname(file.originalname);
-    // Orijinal dosyanın uzantısını al (.jpg, .png vb.)
-    cb(null, benzersizAd + uzanti);
+    cb(null, benzersizAd + path.extname(file.originalname));
   }
 });
 
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 },
-  // Maksimum 5MB dosya boyutu
   fileFilter: (req, file, cb) => {
-    const izinliTipler = /jpeg|jpg|png|webp/;
-    const gecerli = izinliTipler.test(file.mimetype);
-    // Sadece resim dosyalarına izin ver
-    if (gecerli) {
-      cb(null, true);
-    } else {
-      cb(new Error('Sadece resim dosyaları yüklenebilir!'));
-    }
+    const gecerli = /jpeg|jpg|png|webp/.test(file.mimetype);
+    gecerli ? cb(null, true) : cb(new Error('Sadece resim dosyaları yüklenebilir!'));
   }
 });
 
-// === RESİM YÜKLEME ENDPOİNTİ ===
+// === CONFIG ===
+app.get('/api/config', (req, res) => {
+  res.json({
+    googleMapsKey: process.env.GOOGLE_MAPS_API_KEY,
+    adminSifre:    process.env.ADMIN_SIFRE
+  });
+});
+
+// === RESİM YÜKLE ===
 app.post('/api/resim-yukle', upload.array('resimler', 10), (req, res) => {
-  // upload.array('resimler', 10) → "resimler" adıyla max 10 dosya al
-
-  if (!req.files || req.files.length === 0) {
+  if (!req.files || req.files.length === 0)
     return res.status(400).json({ hata: 'Dosya yüklenmedi' });
-  }
-
-  const urls = req.files.map(file => '/uploads/' + file.filename);
-  // Her dosyanın erişilebilir URL'ini oluştur
-
+  const urls = req.files.map(f => '/uploads/' + f.filename);
   res.json({ urls });
-  // URL listesini gönder: ["/uploads/123.jpg", "/uploads/456.jpg"]
 });
 
 // === TÜM İLANLARI GETİR ===
 app.get('/api/ilanlar', (req, res) => {
   const { tip } = req.query;
-
   let ilanlar;
   if (tip && tip !== 'tumu') {
-    ilanlar = db.prepare('SELECT * FROM ilanlar WHERE tip = ? ORDER BY id DESC').all(tip);
+    ilanlar = db.prepare(`
+      SELECT i.*, d.ad as danisman_ad, d.telefon as danisman_tel, d.foto as danisman_foto
+      FROM ilanlar i LEFT JOIN danismanlar d ON i.danisman_id = d.id
+      WHERE i.tip = ? ORDER BY i.id DESC
+    `).all(tip);
   } else {
-    ilanlar = db.prepare('SELECT * FROM ilanlar ORDER BY id DESC').all();
+    ilanlar = db.prepare(`
+      SELECT i.*, d.ad as danisman_ad, d.telefon as danisman_tel, d.foto as danisman_foto
+      FROM ilanlar i LEFT JOIN danismanlar d ON i.danisman_id = d.id
+      ORDER BY i.id DESC
+    `).all();
   }
-
   res.json(ilanlar);
 });
 
 // === TEK İLAN GETİR ===
 app.get('/api/ilanlar/:id', (req, res) => {
-  const { id } = req.params;
-  const ilan = db.prepare('SELECT * FROM ilanlar WHERE id = ?').get(id);
-
-  if (!ilan) {
-    return res.status(404).json({ hata: 'İlan bulunamadı' });
-  }
-
+  const ilan = db.prepare(`
+    SELECT i.*, d.ad as danisman_ad, d.telefon as danisman_tel, d.foto as danisman_foto
+    FROM ilanlar i LEFT JOIN danismanlar d ON i.danisman_id = d.id
+    WHERE i.id = ?
+  `).get(req.params.id);
+  if (!ilan) return res.status(404).json({ hata: 'İlan bulunamadı' });
   res.json(ilan);
 });
-// Yeni endpoint:
-app.get('/api/config', (req, res) => {
-    res.json({ 
-        googleMapsKey: process.env.GOOGLE_MAPS_API_KEY,
-        adminSifre: process.env.ADMIN_SIFRE
-    });
-});
+
 // === YENİ İLAN EKLE ===
 app.post('/api/ilanlar', (req, res) => {
   const {
     baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, resim, resimler, aciklama,
     kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
-    imar, ada_parsel, cephe, kredi_uygunluk, takas
+    imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id
   } = req.body;
 
-  if (!baslik || !konum || !fiyat || !tip || !emlak_tipi) {
+  if (!baslik || !konum || !fiyat || !tip || !emlak_tipi)
     return res.status(400).json({ hata: 'Zorunlu alanlar eksik!' });
-  }
 
   const resimlerStr = Array.isArray(resimler) ? resimler.join(',') : (resimler || resim || '');
-  // Resim listesini virgülle ayrılmış string'e çevir
-  // ["url1", "url2"] → "url1,url2"
+  const anaResim    = Array.isArray(resimler) && resimler.length > 0 ? resimler[0] : (resim || '');
 
-  const anaResim = Array.isArray(resimler) && resimler.length > 0
-    ? resimler[0]
-    : (resim || '');
-  // İlk resmi ana resim olarak kullan
-
-  const ekle = db.prepare(`
+  const sonuc = db.prepare(`
     INSERT INTO ilanlar
     (baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, resim, resimler, aciklama,
      kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
-     imar, ada_parsel, cephe, kredi_uygunluk, takas)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-
-  const sonuc = ekle.run(
+     imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
     baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, anaResim, resimlerStr, aciklama,
     kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
-    imar, ada_parsel, cephe, kredi_uygunluk, takas
+    imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id || null
   );
 
   res.status(201).json({ mesaj: 'İlan eklendi!', id: sonuc.lastInsertRowid });
@@ -139,14 +112,67 @@ app.post('/api/ilanlar', (req, res) => {
 
 // === İLAN SİL ===
 app.delete('/api/ilanlar/:id', (req, res) => {
-  const { id } = req.params;
-  const sonuc = db.prepare('DELETE FROM ilanlar WHERE id = ?').run(id);
-
-  if (sonuc.changes === 0) {
-    return res.status(404).json({ hata: 'İlan bulunamadı' });
-  }
-
+  const sonuc = db.prepare('DELETE FROM ilanlar WHERE id = ?').run(req.params.id);
+  if (sonuc.changes === 0) return res.status(404).json({ hata: 'İlan bulunamadı' });
   res.json({ mesaj: 'İlan silindi' });
+});
+
+// === İLAN GÜNCELLE ===
+app.put('/api/ilanlar/:id', (req, res) => {
+  const {
+    baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, resim, resimler, aciklama,
+    kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
+    imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id
+  } = req.body;
+
+  const resimlerStr = Array.isArray(resimler) ? resimler.join(',') : (resimler || '');
+  const anaResim    = Array.isArray(resimler) && resimler.length > 0 ? resimler[0] : (resim || '');
+
+  const sonuc = db.prepare(`
+    UPDATE ilanlar SET
+      baslik=?, konum=?, fiyat=?, tip=?, emlak_tipi=?, oda=?, metrekare=?,
+      resim=?, resimler=?, aciklama=?, kat=?, bina_yasi=?, isitma=?, ozellikler=?,
+      banyo=?, teras=?, balkon=?, esyali=?, site=?,
+      imar=?, ada_parsel=?, cephe=?, kredi_uygunluk=?, takas=?, danisman_id=?
+    WHERE id=?
+  `).run(
+    baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare,
+    anaResim, resimlerStr, aciklama, kat, bina_yasi, isitma, ozellikler,
+    banyo, teras, balkon, esyali, site,
+    imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id || null,
+    req.params.id
+  );
+
+  if (sonuc.changes === 0) return res.status(404).json({ hata: 'İlan bulunamadı' });
+  res.json({ mesaj: 'İlan güncellendi!' });
+});
+// === TÜM DANIŞMANLARI GETİR ===
+app.get('/api/danismanlar', (req, res) => {
+  const danismanlar = db.prepare('SELECT * FROM danismanlar ORDER BY id ASC').all();
+  res.json(danismanlar);
+});
+
+// === DANIŞMAN EKLE ===
+app.post('/api/danismanlar', (req, res) => {
+  const { ad, telefon, foto } = req.body;
+  if (!ad || !telefon) return res.status(400).json({ hata: 'Ad ve telefon zorunlu!' });
+  const sonuc = db.prepare('INSERT INTO danismanlar (ad, telefon, foto) VALUES (?, ?, ?)').run(ad, telefon, foto || '');
+  res.status(201).json({ mesaj: 'Danışman eklendi!', id: sonuc.lastInsertRowid });
+});
+
+// === DANIŞMAN SİL ===
+app.delete('/api/danismanlar/:id', (req, res) => {
+  const sonuc = db.prepare('DELETE FROM danismanlar WHERE id = ?').run(req.params.id);
+  if (sonuc.changes === 0) return res.status(404).json({ hata: 'Danışman bulunamadı' });
+  res.json({ mesaj: 'Danışman silindi' });
+});
+// === DANIŞMAN GÜNCELLE ===
+app.put('/api/danismanlar/:id', (req, res) => {
+  const { ad, telefon } = req.body;
+  if (!ad || !telefon) return res.status(400).json({ hata: 'Ad ve telefon zorunlu!' });
+  const sonuc = db.prepare('UPDATE danismanlar SET ad=?, telefon=? WHERE id=?').run(ad, telefon, req.params.id);
+  if (sonuc.changes === 0) return res.status(404).json({ hata: 'Danışman bulunamadı' });
+  res.json({ mesaj: 'Danışman güncellendi!' });
 });
 
 app.listen(PORT, () => {

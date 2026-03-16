@@ -2,6 +2,7 @@
 <html lang="tr">
 
 <head>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>İlan Detay | Emlak Durağı</title>
@@ -82,17 +83,11 @@
                     <div class="ozellik-listesi" id="ozellik-listesi"></div>
                 </div>
 
+                <!-- İLETİŞİM KUTUSU — danışman bilgileri dinamik gelecek -->
                 <div class="detay-iletisim-box">
                     <h3>📞 İletişime Geçin</h3>
-                    <div class="iletisim-bilgi">
-                        <div class="iletisim-satir">
-                            <span>👤</span>
-                            <p>Emlak Danışmanı - Oktay Bingöl</p>
-                        </div>
-                        <div class="iletisim-satir">
-                            <span>📞</span>
-                            <p>+90 (534) 540 64 64</p>
-                        </div>
+                    <div class="iletisim-bilgi" id="iletisim-bilgi">
+                        <!-- JS ile doldurulacak -->
                     </div>
                     <div class="iletisim-butonlar">
                         <a id="wp-btn" href="#" class="ara-btn" target="_blank">💬 WhatsApp</a>
@@ -117,7 +112,6 @@
         window.addEventListener('load', () => {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
-
             if (!id) {
                 document.getElementById('yukleniyor').style.display = 'none';
                 document.getElementById('bulunamadi').style.display = 'block';
@@ -129,17 +123,14 @@
         async function ilanGetir(id) {
             try {
                 const cevap = await fetch(`/api/ilanlar/${id}`);
-
                 if (!cevap.ok) {
                     document.getElementById('yukleniyor').style.display = 'none';
                     document.getElementById('bulunamadi').style.display = 'block';
                     return;
                 }
-
                 const ilan = await cevap.json();
                 sayfayiDoldur(ilan);
                 benzerIlanlariGetir(ilan);
-
             } catch (hata) {
                 console.error('Hata:', hata);
                 document.getElementById('yukleniyor').style.display = 'none';
@@ -150,6 +141,7 @@
         function sayfayiDoldur(ilan) {
             document.title = ilan.baslik + ' | Emlak Durağı';
 
+            // === RESİMLER ===
             const tumResimler = ilan.resimler
                 ? ilan.resimler.split(',').filter(r => r.trim())
                 : (ilan.resim ? [ilan.resim] : []);
@@ -169,11 +161,13 @@
                 thumbContainer.style.display = 'none';
             }
 
+            // === BADGE ===
             const badge = document.getElementById('detay-badge');
             badge.textContent = ilan.tip === 'kiralik' ? 'Kiralık' : 'Satılık';
             badge.className = 'badge ' + (ilan.tip === 'kiralik' ? 'kiralik-badge' : 'satilik-badge');
             document.getElementById('detay-tip-badge').textContent = ilan.emlak_tipi;
 
+            // === BAŞLIK / FİYAT ===
             document.getElementById('detay-baslik').textContent = ilan.baslik;
             document.getElementById('detay-konum-yazi').textContent = '📍 ' + ilan.konum;
 
@@ -186,16 +180,36 @@
             const tarihStr = tarih.toLocaleDateString('tr-TR');
             document.getElementById('detay-tarih').textContent = 'İlan Tarihi: ' + tarihStr;
 
+            // === AÇIKLAMA ===
             document.getElementById('detay-aciklama-metin').textContent =
                 ilan.aciklama || 'Bu ilan için açıklama girilmemiş.';
 
+            // === HARİTA ===
             const konumEncoded = encodeURIComponent(ilan.konum + ', Türkiye');
             document.getElementById('harita-iframe').src =
                 `https://maps.google.com/maps?q=${konumEncoded}&output=embed&z=15`;
             document.getElementById('harita-link').href =
                 `https://www.google.com/maps/search/?api=1&query=${konumEncoded}`;
 
-            // ✅ Canlı site linki + doğru numara
+            // === DANIŞMAN + WHATSAPP ===
+           const danismanAd = ilan.danisman_ad || 'Oktay Bingöl';
+           const danismanTel = ilan.danisman_tel || '05345406464';
+            // Telefonu WhatsApp formatına çevir (başındaki 0'ı at, 90 ekle)
+            const wpNumara = danismanTel.startsWith('0')
+                ? '90' + danismanTel.slice(1)
+                : danismanTel.replace(/\D/g, '');
+
+            document.getElementById('iletisim-bilgi').innerHTML = `
+                <div class="iletisim-satir">
+                    <span>👤</span>
+                    <p>${danismanAd}</p>
+                </div>
+                <div class="iletisim-satir">
+                    <span>📞</span>
+                    <p>${danismanTel}</p>
+                </div>
+            `;
+
             const ilanLinki = `https://emlak-duragi.onrender.com/ilan-detay.html?id=${ilan.id}`;
             const wpMesaj = encodeURIComponent(
                 `Merhaba, asagidaki ilan hakkinda bilgi almak istiyorum:\n\n` +
@@ -204,8 +218,9 @@
                 `Fiyat: ${ilan.fiyat.toLocaleString('tr-TR')} TL\n\n` +
                 `Link: ${ilanLinki}`
             );
-            document.getElementById('wp-btn').href = `https://wa.me/905068153434?text=${wpMesaj}`;
+            document.getElementById('wp-btn').href = `https://wa.me/${wpNumara}?text=${wpMesaj}`;
 
+            // === BİLGİ TABLOSU ===
             const arsaTipleri = ['Arsa', 'Tarla', 'Bağ & Bahçe', 'Zeytinlik', 'Çiftlik'];
             const arsaMi = arsaTipleri.includes(ilan.emlak_tipi);
 
@@ -242,6 +257,7 @@
                 </div>
             `).join('');
 
+            // === ÖZELLİKLER ===
             if (ilan.ozellikler && !arsaMi) {
                 const ozellikler = ilan.ozellikler.split(', ');
                 document.getElementById('ozellik-listesi').innerHTML =
@@ -257,9 +273,7 @@
 
         function resimDegistir(thumb, url) {
             document.getElementById('detay-resim-buyuk').src = url;
-            document.querySelectorAll('.galeri-thumbnails img').forEach(img => {
-                img.classList.remove('aktif-thumb');
-            });
+            document.querySelectorAll('.galeri-thumbnails img').forEach(img => img.classList.remove('aktif-thumb'));
             thumb.classList.add('aktif-thumb');
         }
 
@@ -275,7 +289,6 @@
                 const cevap = await fetch(`/api/ilanlar?tip=${ilan.tip}`);
                 let ilanlar = await cevap.json();
                 ilanlar = ilanlar.filter(i => i.id !== ilan.id).slice(0, 3);
-
                 if (ilanlar.length === 0) return;
 
                 document.getElementById('benzer-cards').innerHTML = ilanlar.map(i => {
@@ -284,7 +297,6 @@
                         : `₺${i.fiyat.toLocaleString('tr-TR')}`;
                     const odaBilgi = i.oda ? `<span>🛏 ${i.oda}</span>` : '';
                     const resim = i.resim || 'https://via.placeholder.com/400x250?text=Resim+Yok';
-
                     return `
                         <div class="card" onclick="window.location.href='ilan-detay.html?id=${i.id}'" style="cursor:pointer;">
                             <div class="card-img-wrap">

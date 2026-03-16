@@ -1,7 +1,12 @@
 // === ORTAK HEADER ===
 function headerYukle() {
   const mevcutSayfa = window.location.pathname.split('/').pop() || 'index.html';
-
+  // Favicon ekle
+  const favicon = document.createElement('link');
+  favicon.rel   = 'icon';
+  favicon.href  = '/logo.jpeg';
+  favicon.type  = 'image/jpeg';
+  document.head.appendChild(favicon); 
   const header = `
     <div class="topbar">
       <span>📞 0232 655 84 84 &nbsp;|&nbsp; 📞 0534 540 64 64</span>

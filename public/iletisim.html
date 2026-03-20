@@ -43,7 +43,7 @@
                     <div class="bilgi-ikon-daire">✉️</div>
                     <div>
                         <strong>E-posta</strong>
-                        <p><a href="mailto:info@emlakduragi.com">info@emlakduragi.com</a></p>
+                        <p><a href="mailto:emlakduragialiaga@gmail.com">emlakduragialiaga@gmail.com</a></p>
                     </div>
                 </div>
 
@@ -95,7 +95,7 @@
 
                 <div class="form-group">
                     <label>E-posta <span class="zorunlu">*</span></label>
-                    <input type="email" id="email" placeholder="ornek@email.com">
+                    <input type="email" id="email" placeholder="emlakduragialiaga@gmail.com ">
                 </div>
 
                 <div class="form-group">
@@ -134,43 +134,48 @@
     <div id="footer-alani"></div>
 
     <script>
-        function formuGonder() {
-            const ad_soyad = document.getElementById('ad_soyad').value.trim();
-            const telefon = document.getElementById('telefon').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const konu = document.getElementById('konu').value;
-            const mesaj = document.getElementById('mesaj').value.trim();
+        async function formuGonder() {
+                const ad_soyad = document.getElementById('ad_soyad').value.trim();
+                const telefon = document.getElementById('telefon').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const konu = document.getElementById('konu').value;
+                const mesaj = document.getElementById('mesaj').value.trim();
 
-            if (!ad_soyad || !telefon || !email || !konu || !mesaj) {
-                bildirimGoster('Lutfen tum zorunlu alanlari doldurun!', 'hata');
-                return;
+                if (!ad_soyad || !telefon || !email || !konu || !mesaj) {
+                    bildirimGoster('Lütfen tüm zorunlu alanları doldurun!', 'hata');
+                    return;
+                }
+
+                // Butonu devre dışı bırak
+                const btn = document.querySelector('.iletisim-gonder-btn');
+                btn.disabled = true;
+                btn.textContent = '⏳ Gönderiliyor...';
+
+                try {
+                    const cevap = await fetch('/api/iletisim', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ad_soyad, telefon, email, konu, mesaj })
+                    });
+
+                    const sonuc = await cevap.json();
+
+                    if (cevap.ok) {
+                        bildirimGoster('✅ Mesajınız başarıyla gönderildi! En kısa sürede dönüş yapacağız.', 'basari');
+                        ['ad_soyad', 'telefon', 'email', 'mesaj'].forEach(id => {
+                            document.getElementById(id).value = '';
+                        });
+                        document.getElementById('konu').value = '';
+                    } else {
+                        bildirimGoster('❌ ' + sonuc.hata, 'hata');
+                    }
+                } catch (hata) {
+                    bildirimGoster('❌ Bağlantı hatası! Lütfen tekrar deneyin.', 'hata');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Mesaj Gönder';
+                }
             }
-
-            // WhatsApp
-            const wpMesaj = encodeURIComponent(
-                `Merhaba, iletisim formundan mesaj var:\n\n` +
-                `Ad Soyad: ${ad_soyad}\n` +
-                `Telefon: ${telefon}\n` +
-                `E-posta: ${email}\n` +
-                `Konu: ${konu}\n\n` +
-                `Mesaj: ${mesaj}`
-            );
-            window.open(`https://wa.me/905068153434?text=${wpMesaj}`, '_blank');
-
-            // Mail
-            const mailKonu = encodeURIComponent(`Iletisim Formu: ${konu}`);
-            const mailIcerik = encodeURIComponent(
-                `Ad Soyad: ${ad_soyad}\nTelefon: ${telefon}\nE-posta: ${email}\nKonu: ${konu}\n\nMesaj: ${mesaj}`
-            );
-            window.location.href = `mailto:pelinbingol00@gmail.com?subject=${mailKonu}&body=${mailIcerik}`;
-
-            bildirimGoster('WhatsApp ve mail aciliyor...', 'basari');
-
-            ['ad_soyad', 'telefon', 'email', 'mesaj'].forEach(id => {
-                document.getElementById(id).value = '';
-            });
-            document.getElementById('konu').value = '';
-        }
 
         function bildirimGoster(metin, tip) {
             const el = document.getElementById('form-mesaj');

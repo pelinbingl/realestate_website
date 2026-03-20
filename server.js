@@ -175,6 +175,50 @@ app.put('/api/danismanlar/:id', (req, res) => {
   res.json({ mesaj: 'Danışman güncellendi!' });
 });
 
+
+
+// === NODEMAILER KURULUM ===
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS
+  }
+});
+
+// === İLETİŞİM FORMU MAİL GÖNDER ===
+app.post('/api/iletisim', async (req, res) => {
+  const { ad_soyad, telefon, email, konu, mesaj } = req.body;
+
+  if (!ad_soyad || !telefon || !email || !konu || !mesaj) {
+    return res.status(400).json({ hata: 'Tüm alanlar zorunlu!' });
+  }
+
+  try {
+    await transporter.sendMail({
+      from: `"Emlak Durağı İletişim" <${process.env.MAIL_USER}>`,
+      to: process.env.MAIL_TO,
+      subject: `İletişim Formu: ${konu}`,
+      html: `
+        <h2>Yeni İletişim Formu Mesajı</h2>
+        <table style="border-collapse:collapse;width:100%;">
+          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">Ad Soyad</td><td style="padding:8px;border:1px solid #ddd;">${ad_soyad}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">Telefon</td><td style="padding:8px;border:1px solid #ddd;">${telefon}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">E-posta</td><td style="padding:8px;border:1px solid #ddd;">${email}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">Konu</td><td style="padding:8px;border:1px solid #ddd;">${konu}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">Mesaj</td><td style="padding:8px;border:1px solid #ddd;">${mesaj}</td></tr>
+        </table>
+      `
+    });
+    res.json({ mesaj: 'Mail gönderildi!' });
+  } catch (hata) {
+    console.error('Mail hatası:', hata);
+    res.status(500).json({ hata: 'Mail gönderilemedi!' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`✅ Sunucu çalışıyor: http://localhost:${PORT}`);
 });

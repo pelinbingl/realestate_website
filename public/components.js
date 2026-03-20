@@ -10,7 +10,7 @@ function headerYukle() {
   const header = `
     <div class="topbar">
       <span>📞 0232 655 84 84 &nbsp;|&nbsp; 📞 0534 540 64 64</span>
-      <span>✉️ info@emlakduragi.com</span>
+      <span>✉️ emlakduragialiaga@gmail.com</span>
       <span>🕐 Hafta içi 09:00 - 18:00</span>
     </div>
 
@@ -70,7 +70,7 @@ function footerYukle() {
           <p>📍 Kazım Dirik Mah. Atatürk Cad.<br>No:78/C Aliağa/İzmir</p>
           <p>📞 0232 655 84 84</p>
           <p>📞 0534 540 64 64</p>
-          <p>✉️ info@emlakduragi.com</p>
+          <p>✉️ emlakduragialiaga@gmail.com</p>
         </div>
       </div>
       <div class="footer-bottom">

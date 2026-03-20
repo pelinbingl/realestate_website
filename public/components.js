@@ -4,8 +4,8 @@ function headerYukle() {
   // Favicon ekle
   const favicon = document.createElement('link');
   favicon.rel   = 'icon';
-  favicon.href  = '/logo.jpeg';
-  favicon.type  = 'image/jpeg';
+  favicon.href  = '/logo.png';
+  favicon.type  = 'image/png';
   document.head.appendChild(favicon); 
   const header = `
     <div class="topbar">
@@ -17,7 +17,7 @@ function headerYukle() {
     <header>
       <div class="logo">
         <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
-          <img src="logo.jpeg" alt="Emlak Durağı Logo" class="logo-img">
+          <img src="logo.png" alt="Emlak Durağı Logo" class="logo-img">
           <div class="logo-text">
             <span class="logo-main">EMLAK DURAĞI</span>
             <span class="logo-sub">Gayrimenkul Danışmanlığı</span>
@@ -43,7 +43,7 @@ function footerYukle() {
     <footer>
       <div class="footer-container">
         <div class="footer-col">
-          <img src="logo.jpeg" alt="Logo" class="logo-img" style="margin-bottom:10px;">
+          <img src="logo.png" alt="Logo" class="logo-img" style="margin-bottom:10px;">
           <p>Hayalinizdeki evi bulmanız için güvenilir, hızlı ve profesyonel hizmet.</p>
         </div>
         <div class="footer-col">

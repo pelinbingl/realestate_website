@@ -18,7 +18,7 @@
         align-items:center;justify-content:center;">
         <div
             style="background:#fff;border-radius:16px;padding:40px;width:360px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.5);">
-            <img src="logo.jpeg" alt="Logo" style="width:80px;border-radius:50%;margin-bottom:16px;">
+            <img src="logo.png" alt="Logo" style="width:80px;border-radius:50%;margin-bottom:16px;">
             <h2 style="margin:0 0 8px;color:#111;">Admin Paneli</h2>
             <p style="color:#999;font-size:14px;margin-bottom:24px;">Devam etmek için şifrenizi girin</p>
             <input type="password" id="sifre-input" placeholder="Şifre" style="width:100%;padding:12px 16px;border:2px solid #ddd;border-radius:8px;
@@ -615,6 +615,10 @@
             document.getElementById('iptal-btn').style.display = 'none';
             document.getElementById('mevcut-resimler').style.display = 'none';
             formuTemizle();
+            // URL'den ?duzenle parametresini temizle
+            const url = new URL(window.location);
+            url.searchParams.delete('duzenle');
+            window.history.replaceState({}, '', url);
         }
 
         // === DANIŞMANLAR ===
@@ -622,14 +626,12 @@
             const cevap = await fetch('/api/danismanlar');
             const danismanlar = await cevap.json();
 
-            // Dropdown güncelle
             const select = document.getElementById('danisman_id');
             select.innerHTML = '<option value="">— Danışman Seç —</option>';
             danismanlar.forEach(d => {
                 select.innerHTML += `<option value="${d.id}">${d.ad} — ${d.telefon}</option>`;
             });
 
-            // Liste güncelle
             const liste = document.getElementById('danisman-listesi');
             if (danismanlar.length === 0) {
                 liste.innerHTML = '<p style="color:#999;font-size:13px;">Henüz danışman eklenmedi.</p>'; return;
@@ -637,12 +639,10 @@
 
             liste.innerHTML = danismanlar.map(d => `
                 <div style="background:#f9f9f9;border-radius:8px;margin-bottom:8px;overflow:hidden;" id="danisman-satir-${d.id}">
-
-                    <!-- GÖRÜNTÜLEME MODU -->
                     <div id="danisman-goruntule-${d.id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;">
                         <div>
-                            <strong style="font-size:14px;">👤 ${d.ad}</strong>
-                            <span style="color:#777;font-size:13px;margin-left:8px;">📞 ${d.telefon}</span>
+                           <a href="danisman-detay.html?id=${d.id}" style="font-size:14px;font-weight:700;color:#111;text-decoration:none;border-bottom:2px solid #f9e01a;">👤 ${d.ad}</a>
+                           <span style="color:#777;font-size:13px;margin-left:8px;">📞 ${d.telefon}</span>
                         </div>
                         <div style="display:flex;gap:6px;">
                             <button onclick="danismanDuzenleAc(${d.id})" style="
@@ -653,8 +653,6 @@
                                 border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">Sil</button>
                         </div>
                     </div>
-
-                    <!-- DÜZENLEME MODU -->
                     <div id="danisman-duzenle-${d.id}" style="display:none;padding:10px 12px;border-top:2px solid #f9e01a;">
                         <div style="display:flex;gap:6px;flex-wrap:wrap;">
                             <input type="text" id="danisman-duzenle-ad-${d.id}" value="${d.ad}"
@@ -671,7 +669,6 @@
                                 border-radius:6px;cursor:pointer;font-size:12px;">İptal</button>
                         </div>
                     </div>
-
                 </div>
             `).join('');
         }
@@ -821,9 +818,17 @@
             return sonuc.urls;
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            adminIlanlariYukle();
-            danismanlariYukle();
+        document.addEventListener('DOMContentLoaded', async () => {
+            await adminIlanlariYukle();
+            await danismanlariYukle();
+
+            // ✅ DÜZELTİLDİ: danisman-detay.html'den gelen ?duzenle=ID parametresini oku
+            const urlParams = new URLSearchParams(window.location.search);
+            const duzenleId = urlParams.get('duzenle');
+            if (duzenleId) {
+                // Danışmanlar dropdown yüklendikten sonra formu aç
+                await ilanDuzenle(Number(duzenleId));
+            }
         });
 
         async function adminIlanlariYukle() {
@@ -836,8 +841,10 @@
             container.innerHTML = ilanlar.map(ilan => `
                 <div class="admin-ilan-satir">
                     <div style="display:flex;gap:12px;align-items:center;">
-                        <img src="${ilan.resim || 'https://via.placeholder.com/60x45'}" alt=""
-                             style="width:60px;height:45px;object-fit:cover;border-radius:4px;">
+                        <img src="${ilan.resim || ''}" alt=""
+                             onerror="this.style.display='none'"
+                             style="${ilan.resim ? 'width:60px;height:45px;object-fit:cover;border-radius:4px;' : 'display:none'}">
+                        ${!ilan.resim ? `<div style="width:60px;height:45px;background:#f0f0f0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px;">🏠</div>` : ''}
                         <div class="admin-ilan-bilgi">
                             <strong>${ilan.baslik}</strong>
                             <span>📍 ${ilan.konum}</span>

@@ -146,10 +146,30 @@ app.put('/api/ilanlar/:id', (req, res) => {
   if (sonuc.changes === 0) return res.status(404).json({ hata: 'İlan bulunamadı' });
   res.json({ mesaj: 'İlan güncellendi!' });
 });
+
 // === TÜM DANIŞMANLARI GETİR ===
 app.get('/api/danismanlar', (req, res) => {
   const danismanlar = db.prepare('SELECT * FROM danismanlar ORDER BY id ASC').all();
   res.json(danismanlar);
+});
+
+// === TEK DANIŞMAN GETİR ===  ← EKSİK OLAN BUYDU
+app.get('/api/danismanlar/:id', (req, res) => {
+  const danisman = db.prepare('SELECT * FROM danismanlar WHERE id = ?').get(req.params.id);
+  if (!danisman) return res.status(404).json({ hata: 'Danışman bulunamadı' });
+  res.json(danisman);
+});
+
+// === DANIŞMANA AİT İLANLAR ===
+app.get('/api/danismanlar/:id/ilanlar', (req, res) => {
+  const ilanlar = db.prepare(`
+    SELECT i.*, d.ad as danisman_ad
+    FROM ilanlar i
+    LEFT JOIN danismanlar d ON i.danisman_id = d.id
+    WHERE i.danisman_id = ?
+    ORDER BY i.id DESC
+  `).all(req.params.id);
+  res.json(ilanlar);
 });
 
 // === DANIŞMAN EKLE ===
@@ -166,6 +186,7 @@ app.delete('/api/danismanlar/:id', (req, res) => {
   if (sonuc.changes === 0) return res.status(404).json({ hata: 'Danışman bulunamadı' });
   res.json({ mesaj: 'Danışman silindi' });
 });
+
 // === DANIŞMAN GÜNCELLE ===
 app.put('/api/danismanlar/:id', (req, res) => {
   const { ad, telefon } = req.body;
@@ -174,8 +195,6 @@ app.put('/api/danismanlar/:id', (req, res) => {
   if (sonuc.changes === 0) return res.status(404).json({ hata: 'Danışman bulunamadı' });
   res.json({ mesaj: 'Danışman güncellendi!' });
 });
-
-
 
 // === NODEMAILER KURULUM ===
 const nodemailer = require('nodemailer');

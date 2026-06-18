@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ override: true });
 
 const express = require('express');
 const multer  = require('multer');
@@ -9,7 +9,7 @@ const db      = require('./database');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static('public'));
+app.use(express.static('public', { extensions: ['html'] }));
 app.use(express.json());
 
 // === RESİM YÜKLEME AYARLARI ===
@@ -43,26 +43,31 @@ app.get('/api/config', (req, res) => {
 });
 
 // === RESİM YÜKLE ===
-app.post('/api/resim-yukle', upload.array('resimler', 10), (req, res) => {
+app.post('/api/resim-yukle', upload.array('resimler', 35), (req, res) => {
   if (!req.files || req.files.length === 0)
     return res.status(400).json({ hata: 'Dosya yüklenmedi' });
   const urls = req.files.map(f => '/uploads/' + f.filename);
   res.json({ urls });
 });
-
 // === TÜM İLANLARI GETİR ===
 app.get('/api/ilanlar', (req, res) => {
   const { tip } = req.query;
   let ilanlar;
   if (tip && tip !== 'tumu') {
     ilanlar = db.prepare(`
-      SELECT i.*, d.ad as danisman_ad, d.telefon as danisman_tel, d.foto as danisman_foto
+      SELECT i.*,
+        COALESCE(d.ad, 'Oktay Bingöl') as danisman_ad,
+        COALESCE(d.telefon, '0534 540 64 64') as danisman_tel,
+        d.foto as danisman_foto
       FROM ilanlar i LEFT JOIN danismanlar d ON i.danisman_id = d.id
       WHERE i.tip = ? ORDER BY i.id DESC
     `).all(tip);
   } else {
     ilanlar = db.prepare(`
-      SELECT i.*, d.ad as danisman_ad, d.telefon as danisman_tel, d.foto as danisman_foto
+      SELECT i.*,
+        COALESCE(d.ad, 'Oktay Bingöl') as danisman_ad,
+        COALESCE(d.telefon, '0534 540 64 64') as danisman_tel,
+        d.foto as danisman_foto
       FROM ilanlar i LEFT JOIN danismanlar d ON i.danisman_id = d.id
       ORDER BY i.id DESC
     `).all();
@@ -73,7 +78,10 @@ app.get('/api/ilanlar', (req, res) => {
 // === TEK İLAN GETİR ===
 app.get('/api/ilanlar/:id', (req, res) => {
   const ilan = db.prepare(`
-    SELECT i.*, d.ad as danisman_ad, d.telefon as danisman_tel, d.foto as danisman_foto
+    SELECT i.*,
+      COALESCE(d.ad, 'Oktay Bingöl') as danisman_ad,
+      COALESCE(d.telefon, '0534 540 64 64') as danisman_tel,
+      d.foto as danisman_foto
     FROM ilanlar i LEFT JOIN danismanlar d ON i.danisman_id = d.id
     WHERE i.id = ?
   `).get(req.params.id);
@@ -162,16 +170,30 @@ app.get('/api/danismanlar/:id', (req, res) => {
 
 // === DANIŞMANA AİT İLANLAR ===
 app.get('/api/danismanlar/:id/ilanlar', (req, res) => {
-  const ilanlar = db.prepare(`
-    SELECT i.*, d.ad as danisman_ad
-    FROM ilanlar i
-    LEFT JOIN danismanlar d ON i.danisman_id = d.id
-    WHERE i.danisman_id = ?
-    ORDER BY i.id DESC
-  `).all(req.params.id);
+  const id = req.params.id;
+  const danisman = db.prepare('SELECT * FROM danismanlar WHERE id = ?').get(id);
+
+  let ilanlar;
+  if (danisman && danisman.ad === 'Oktay Bingöl') {
+    // Oktay Bingöl varsayılan danışman: danışmansız (boş) ilanlar da onun sayımına dahil
+    ilanlar = db.prepare(`
+      SELECT i.*, COALESCE(d.ad, 'Oktay Bingöl') as danisman_ad
+      FROM ilanlar i
+      LEFT JOIN danismanlar d ON i.danisman_id = d.id
+      WHERE i.danisman_id = ? OR i.danisman_id IS NULL
+      ORDER BY i.id DESC
+    `).all(id);
+  } else {
+    ilanlar = db.prepare(`
+      SELECT i.*, d.ad as danisman_ad
+      FROM ilanlar i
+      LEFT JOIN danismanlar d ON i.danisman_id = d.id
+      WHERE i.danisman_id = ?
+      ORDER BY i.id DESC
+    `).all(id);
+  }
   res.json(ilanlar);
 });
-
 // === DANIŞMAN EKLE ===
 app.post('/api/danismanlar', (req, res) => {
   const { ad, telefon, foto } = req.body;

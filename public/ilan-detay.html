@@ -50,8 +50,14 @@
 
                 <div class="sekme-icerik" id="sekme-konum">
                     <div class="harita-alan">
-                        <iframe id="harita-iframe" width="100%" height="350" style="border:0; border-radius:12px;"
-                            loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" src="">
+                        <div id="harita-adres-yazisi" style="
+                            background:#fff7d6;border:1px solid #f9e01a;padding:12px 16px;
+                            border-radius:10px;font-weight:700;font-size:15px;color:#111;
+                            margin-bottom:12px;">
+                            📍 <span id="harita-adres-metin"></span>
+                        </div>
+                        <iframe id="harita-iframe" width="100%" height="350" style="border:0; border-radius:12px;" loading="lazy"
+                            allowfullscreen referrerpolicy="no-referrer-when-downgrade" src="">
                         </iframe>
                         <a id="harita-link" href="#" target="_blank" class="harita-yonlendir-btn">
                             🗺️ Google Maps'te Aç
@@ -185,11 +191,14 @@
                 ilan.aciklama || 'Bu ilan için açıklama girilmemiş.';
 
             // === HARİTA ===
+           // === HARİTA ===
             const konumEncoded = encodeURIComponent(ilan.konum + ', Türkiye');
             document.getElementById('harita-iframe').src =
                 `https://maps.google.com/maps?q=${konumEncoded}&output=embed&z=15`;
             document.getElementById('harita-link').href =
                 `https://www.google.com/maps/search/?api=1&query=${konumEncoded}`;
+            document.getElementById('harita-adres-metin').textContent = ilan.konum;
+
 
             // === DANIŞMAN + WHATSAPP ===
            const danismanAd = ilan.danisman_ad || 'Oktay Bingöl';

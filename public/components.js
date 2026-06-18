@@ -24,7 +24,12 @@ function headerYukle() {
           </div>
         </a>
       </div>
-      <nav>
+      <button class="hamburger" id="hamburger-btn" aria-label="Menüyü aç/kapat">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav id="ana-nav">
         <a href="index.html"      class="${mevcutSayfa === 'index.html'      ? 'active' : ''}">Ana Sayfa</a>
         <a href="kiralik.html"    class="${mevcutSayfa === 'kiralik.html'    ? 'active' : ''}">Kiralık</a>
         <a href="satilik.html"    class="${mevcutSayfa === 'satilik.html'    ? 'active' : ''}">Satılık</a>
@@ -86,4 +91,21 @@ function footerYukle() {
 document.addEventListener('DOMContentLoaded', () => {
   headerYukle();
   footerYukle();
+
+  // Hamburger menü toggle
+  const hamburger = document.getElementById('hamburger-btn');
+  const nav = document.getElementById('ana-nav');
+  if (hamburger && nav) {
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('acik');
+      nav.classList.toggle('acik');
+    });
+    // Menü linkine tıklanınca kapat
+    nav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('acik');
+        nav.classList.remove('acik');
+      });
+    });
+  }
 });

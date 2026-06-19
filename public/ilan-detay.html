@@ -201,13 +201,14 @@
 
 
             // === DANIŞMAN + WHATSAPP ===
-           const danismanAd = ilan.danisman_ad || 'Oktay Bingöl';
-           const danismanTel = ilan.danisman_tel || '05345406464';
-            // Telefonu WhatsApp formatına çevir (başındaki 0'ı at, 90 ekle)
-            const wpNumara = danismanTel.startsWith('0')
-                ? '90' + danismanTel.slice(1)
-                : danismanTel.replace(/\D/g, '');
-
+            const danismanAd = ilan.danisman_ad || 'Oktay Bingöl';
+            const danismanTel = ilan.danisman_tel || '05345406464';
+            // Tüm boşluk ve tire gibi karakterleri temizle, sadece rakam kalsın
+            const temizTel = danismanTel.replace(/\D/g, '');
+            // WhatsApp formatı: başındaki 0'ı at, 90 ekle
+            const wpNumara = temizTel.startsWith('0')
+                ? '90' + temizTel.slice(1)
+                : '90' + temizTel;
             document.getElementById('iletisim-bilgi').innerHTML = `
                 <div class="iletisim-satir">
                     <span>👤</span>

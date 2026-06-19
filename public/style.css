@@ -2234,3 +2234,137 @@ img {
         align-items: center;
     }
 }
+/* ============================================================
+   MOBİL & WEB UYUM DÜZELTMELERİ — style.css'in EN ALTINA EKLE
+   ============================================================ */
+
+/* === TOPBAR: Mobilde gizle, webde düzgün göster === */
+@media (max-width: 768px) {
+    .topbar {
+        display: none;
+    }
+}
+
+/* === DETAY SEKMELERİ: Mobilde yatay kaydırılabilir === */
+.detay-sekmeler {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+}
+
+.detay-sekmeler::-webkit-scrollbar {
+    display: none;
+}
+
+.sekme-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* === KONUM TEXTAREA: Web ve mobil uyumlu === */
+#konum {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 60px;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+#konum:focus {
+    outline: none;
+    border-color: #f9e01a;
+}
+
+/* === DETAY SAYFASI: Sağ kolon mobilde tam genişlik === */
+@media (max-width: 768px) {
+    .detay-sag {
+        flex: none !important;
+        width: 100% !important;
+    }
+
+    /* Fiyat ve tarih alt alta gitsin */
+    .detay-fiyat-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    /* Galeri thumbnail boyutu küçülsün */
+    .galeri-thumbnails img {
+        width: 65px;
+        height: 50px;
+    }
+
+    /* Benzer ilanlar tek sütun */
+    .benzer-ilanlar .cards-container {
+        grid-template-columns: 1fr;
+    }
+
+    /* İletişim kutusundaki buton tam genişlik */
+    .ara-btn {
+        padding: 14px;
+        font-size: 15px;
+    }
+
+    /* Admin panel form ve liste alt alta */
+    .admin-container {
+        flex-direction: column;
+        padding: 12px;
+    }
+
+    /* Önizleme grid 3 sütun yerine 2 sütun */
+    .onizleme-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Harita iframe yüksekliği */
+    #harita-iframe {
+        height: 260px;
+    }
+
+    /* Harita adres kutusu taşmasın */
+    #harita-adres-yazisi {
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+}
+
+/* === KÜÇÜK MOBİL (max 480px) === */
+@media (max-width: 480px) {
+    .detay-fiyat {
+        font-size: 20px;
+    }
+
+    .detay-baslik-box h1 {
+        font-size: 16px;
+    }
+
+    .sekme-btn {
+        padding: 10px 14px;
+        font-size: 12px;
+    }
+
+    /* Galeri tek sıra yatay scroll */
+    .galeri-thumbnails {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .galeri-thumbnails::-webkit-scrollbar {
+        display: none;
+    }
+
+    .galeri-thumbnails img {
+        width: 60px;
+        height: 45px;
+        flex-shrink: 0;
+    }
+}

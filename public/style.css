@@ -1123,19 +1123,19 @@ footer {
 
 .liste-container {
     display: flex;
-    gap: 25px;
+    gap: 30px;
     padding: 30px 40px;
-    max-width: 1200px;
+    max-width: 1320px;
     margin: 0 auto;
     align-items: flex-start;
 }
 
 /* SOL: FİLTRE PANELİ */
 .filtre-panel {
-    flex: 0 0 220px;
+    flex: 0 0 260px;
     background: white;
     border-radius: 10px;
-    padding: 20px;
+    padding: 24px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
     position: sticky;
     top: 80px;
@@ -1183,10 +1183,10 @@ footer {
 .filtre-grup select,
 .filtre-grup input {
     width: 100%;
-    padding: 8px 10px;
+    padding: 10px 12px;
     border: 1px solid #ddd;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 14px;
     color: #444;
     font-family: inherit;
 }
@@ -1232,9 +1232,9 @@ footer {
     background: #f9e01a;
     color: #111;
     border: none;
-    padding: 10px;
+    padding: 12px;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     cursor: pointer;
     margin-top: 8px;
@@ -1278,13 +1278,13 @@ footer {
 .liste-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    gap: 24px;
 }
 
 /* Tek ilan kartı */
 .liste-kart {
     background: white;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
     cursor: pointer;
@@ -1303,7 +1303,7 @@ footer {
 
 .liste-kart-resim img {
     width: 100%;
-    height: 170px;
+    height: 210px;
     object-fit: cover;
     display: block;
 }
@@ -1318,16 +1318,16 @@ footer {
     font-size: 11px;
     font-weight: 700;
     padding: 3px 8px;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
 /* Kart bilgi alanı */
 .liste-kart-bilgi {
-    padding: 12px;
+    padding: 18px;
 }
 
 .liste-kart-bilgi h3 {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 700;
     color: #111;
     margin-bottom: 4px;
@@ -1339,7 +1339,7 @@ footer {
 }
 
 .liste-konum {
-    font-size: 11px;
+    font-size: 12px;
     color: #888;
     margin-bottom: 8px;
 }

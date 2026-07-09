@@ -288,6 +288,7 @@
                 bilgiler.push({ baslik: 'Emlak Tipi', deger: ilan.emlak_tipi });
             } else {
                 if (ilan.oda) bilgiler.push({ baslik: 'Oda Sayısı', deger: ilan.oda });
+                if (ilan.metrekare_brut) bilgiler.push({ baslik: 'Brüt Alan', deger: ilan.metrekare_brut + ' m²' });
                 if (ilan.metrekare) bilgiler.push({ baslik: 'Net Alan', deger: ilan.metrekare + ' m²' });
                 if (ilan.bina_yasi) bilgiler.push({ baslik: 'Bina Yaşı', deger: ilan.bina_yasi });
                 if (ilan.kat) bilgiler.push({ baslik: 'Bulunduğu Kat', deger: ilan.kat });

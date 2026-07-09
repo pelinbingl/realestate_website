@@ -130,14 +130,17 @@
 
             <div class="form-group">
                 <label>İlçe (İzmir)</label>
-                <select id="ilce-sec" onchange="konumGuncelle()"></select>
+                <select id="ilce-sec" onchange="mahalleleriDoldur()"></select>
             </div>
 
             <div class="form-group">
-                <label>Mahalle / Sokak / Detay (opsiyonel)</label>
+                <label>Mahalle</label>
+                <select id="mahalle-sec" onchange="konumGuncelle()"></select>
+            </div>
+
+            <div class="form-group">
+                <label>Sokak / Detay (opsiyonel)</label>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <input type="text" id="mahalle" placeholder="Mahalle" oninput="konumGuncelle()"
-                        style="flex:1; min-width:140px;" />
                     <input type="text" id="sokak" placeholder="Sokak" oninput="konumGuncelle()"
                         style="flex:1; min-width:140px;" />
                     <input type="text" id="detay" placeholder="Detay (blok, no vb.)" oninput="konumGuncelle()"
@@ -146,7 +149,7 @@
             </div>
 
             <div class="form-group">
-                <label>Konum <span style="color:#999;font-weight:400;font-size:12px">(ilçe seçince otomatik dolar,
+                <label>Konum <span style="color:#999;font-weight:400;font-size:12px">(seçimlere göre otomatik dolar,
                         istersen elle düzenle)</span></label>
                 <textarea id="konum" rows="2" placeholder="örn: İzmir, Aliağa"></textarea>
             </div>
@@ -164,9 +167,15 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label>Metrekare (m²)</label>
-                <input type="number" id="metrekare" placeholder="örn: 120" />
+            <div style="display:flex; gap:12px;">
+                <div class="form-group" style="flex:1;">
+                    <label>Brüt Metrekare (m²)</label>
+                    <input type="number" id="metrekare_brut" placeholder="örn: 135" />
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Net Metrekare (m²)</label>
+                    <input type="number" id="metrekare" placeholder="örn: 120" />
+                </div>
             </div>
 
             <div class="form-group">
@@ -302,7 +311,10 @@
                 </div>
                 <div class="form-group">
                     <label>Ada / Parsel (opsiyonel)</label>
-                    <input type="text" id="ada_parsel" placeholder="örn: Ada: 123, Parsel: 45" />
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="ada" placeholder="Ada" style="flex:1;" />
+                        <input type="text" id="parsel" placeholder="Parsel" style="flex:1;" />
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Cephe</label>
@@ -491,7 +503,7 @@
         let duzenleIlanId = null;
         let mevcutResimler = [];
 
-        // === İLÇE SEÇİMİ (yalnızca İzmir) ===
+        // === İLÇE / MAHALLE SEÇİMİ (yalnızca İzmir) ===
         function illeriDoldur() {
             const ilceSec = document.getElementById("ilce-sec");
             ilceSec.innerHTML = "";
@@ -503,15 +515,35 @@
             });
             // Bu işletme çoğunlukla Aliağa'da faaliyet gösterdiği için varsayılan
             ilceSec.value = "Aliağa";
+            mahalleleriDoldur();
+        }
+
+        function mahalleleriDoldur(seciliMahalle) {
+            const ilce = document.getElementById("ilce-sec").value;
+            const mahalleSec = document.getElementById("mahalle-sec");
+            mahalleSec.innerHTML = '<option value="">Seçiniz</option>';
+            (IZMIR_MAHALLELERI[ilce] || []).forEach((mahalle) => {
+                const opt = document.createElement("option");
+                opt.value = mahalle;
+                opt.textContent = mahalle;
+                mahalleSec.appendChild(opt);
+            });
+            if (seciliMahalle) mahalleSec.value = seciliMahalle;
             konumGuncelle();
         }
 
         function konumGuncelle() {
             const ilce = document.getElementById("ilce-sec").value;
-            const mahalle = document.getElementById("mahalle").value.trim();
+            const mahalle = document.getElementById("mahalle-sec").value;
             const sokak = document.getElementById("sokak").value.trim();
             const detay = document.getElementById("detay").value.trim();
-            const parcalar = [mahalle, sokak, detay, ilce, "İzmir"].filter(Boolean);
+            const parcalar = [
+                mahalle ? mahalle + " Mah." : "",
+                sokak,
+                detay,
+                ilce,
+                "İzmir",
+            ].filter(Boolean);
             document.getElementById("konum").value = parcalar.join(", ");
         }
 
@@ -667,10 +699,23 @@
             document.getElementById("konum").value = ilan.konum || "";
             document.getElementById("fiyat").value = ilan.fiyat || "";
             document.getElementById("metrekare").value = ilan.metrekare || "";
+            document.getElementById("metrekare_brut").value = ilan.metrekare_brut || "";
             document.getElementById("aciklama").value = ilan.aciklama || "";
             document.getElementById("aciklama-editor").innerHTML = ilan.aciklama || "";
             document.getElementById("tip").value = ilan.tip || "satilik";
             document.getElementById("danisman_id").value = ilan.danisman_id || "";
+
+            // Bu ilan mevcut il/ilçe/mahalle seçimlerinden hangisiyle eşleşiyorsa
+            // onu seçili getirmeyi dener (eski serbest metin adresler için garanti
+            // edilemez, gerekirse admin elle düzeltebilir).
+            const ilceEslesme = IZMIR_ILCELERI.find((ilce) => (ilan.konum || "").includes(ilce));
+            if (ilceEslesme) document.getElementById("ilce-sec").value = ilceEslesme;
+            const mahalleAdaylari = IZMIR_MAHALLELERI[document.getElementById("ilce-sec").value] || [];
+            const mahalleEslesme = mahalleAdaylari.find((m) => (ilan.konum || "").includes(m));
+            mahalleleriDoldur(mahalleEslesme || "");
+            // mahalleleriDoldur konumu otomatik yeniden oluşturur; düzenleme
+            // açılırken orijinal (kaydedilmiş) adres metnini korumak için geri yükle.
+            document.getElementById("konum").value = ilan.konum || "";
 
             const arsaTipleri = [
                 "Arsa",
@@ -686,7 +731,10 @@
                 document.getElementById("emlak_tipi_arsa").value =
                     ilan.emlak_tipi || "Arsa";
                 document.getElementById("imar").value = ilan.imar || "İmarlı";
-                document.getElementById("ada_parsel").value = ilan.ada_parsel || "";
+                const adaMatch = (ilan.ada_parsel || "").match(/Ada:\s*([^,]+)/i);
+                const parselMatch = (ilan.ada_parsel || "").match(/Parsel:\s*(.+)/i);
+                document.getElementById("ada").value = adaMatch ? adaMatch[1].trim() : "";
+                document.getElementById("parsel").value = parselMatch ? parselMatch[1].trim() : "";
                 document.getElementById("cephe").value = ilan.cephe || "";
                 document.getElementById("kredi_uygunluk").value =
                     ilan.kredi_uygunluk || "Evet";
@@ -882,6 +930,8 @@
             const fiyat = Number(document.getElementById("fiyat").value);
             const tip = document.getElementById("tip").value;
             const metrekare = Number(document.getElementById("metrekare").value);
+            const metrekareBrutEl = document.getElementById("metrekare_brut");
+            const metrekare_brut = metrekareBrutEl.value ? Number(metrekareBrutEl.value) : null;
             const aciklamaEditor = document.getElementById("aciklama-editor");
             const aciklama = aciklamaEditor.textContent.trim() ? aciklamaEditor.innerHTML.trim() : "";
 
@@ -926,6 +976,7 @@
                 fiyat,
                 tip,
                 metrekare,
+                metrekare_brut,
                 aciklama,
                 resim: kapakUrl,
                 resimler: siraliResimler,
@@ -958,10 +1009,15 @@
                 ilanVerisi.site = document.getElementById("site").value;
                 ilanVerisi.ozellikler = ozellikler.join(", ");
             } else {
+                const ada = document.getElementById("ada").value.trim();
+                const parsel = document.getElementById("parsel").value.trim();
+                const adaParselParcalari = [];
+                if (ada) adaParselParcalari.push("Ada: " + ada);
+                if (parsel) adaParselParcalari.push("Parsel: " + parsel);
                 ilanVerisi.emlak_tipi =
                     document.getElementById("emlak_tipi_arsa").value;
                 ilanVerisi.imar = document.getElementById("imar").value;
-                ilanVerisi.ada_parsel = document.getElementById("ada_parsel").value;
+                ilanVerisi.ada_parsel = adaParselParcalari.join(", ");
                 ilanVerisi.cephe = document.getElementById("cephe").value;
                 ilanVerisi.kredi_uygunluk =
                     document.getElementById("kredi_uygunluk").value;
@@ -1102,9 +1158,11 @@
                 "konum",
                 "fiyat",
                 "metrekare",
+                "metrekare_brut",
                 "aciklama",
                 "kat",
-                "ada_parsel",
+                "ada",
+                "parsel",
             ].forEach((id) => {
                 const el = document.getElementById(id);
                 if (el) el.value = "";
@@ -1126,7 +1184,6 @@
             mevcutResimler = [];
             document.getElementById("onizleme-grid").innerHTML = "";
             document.getElementById("resim-input").value = "";
-            document.getElementById("mahalle").value = "";
             document.getElementById("sokak").value = "";
             document.getElementById("detay").value = "";
             document.getElementById("danisman_id").value = "";

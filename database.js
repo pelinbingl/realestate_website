@@ -35,6 +35,7 @@ async function hazirla() {
       emlak_tipi      TEXT NOT NULL,
       oda             TEXT,
       metrekare       INTEGER,
+      metrekare_brut  INTEGER,
       resim           TEXT,
       resimler        TEXT,
       aciklama        TEXT,
@@ -56,6 +57,10 @@ async function hazirla() {
       tarih           TIMESTAMP DEFAULT NOW()
     )
   `);
+
+  // Daha önce oluşturulmuş (canlıdaki) tabloda bu kolon yoksa ekle —
+  // CREATE TABLE IF NOT EXISTS zaten var olan tabloyu değiştirmediği için gerekli.
+  await pool.query(`ALTER TABLE ilanlar ADD COLUMN IF NOT EXISTS metrekare_brut INTEGER`);
 
   const { rows: danismanSayisi } = await pool.query('SELECT COUNT(*)::int AS sayi FROM danismanlar');
   if (danismanSayisi[0].sayi === 0) {

@@ -258,7 +258,7 @@ app.get('/api/ilanlar/:id', async (req, res) => {
 // === YENİ İLAN EKLE ===
 app.post('/api/ilanlar', adminYetkiKontrol, async (req, res) => {
   const {
-    baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, resim, resimler, aciklama,
+    baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, metrekare_brut, resim, resimler, aciklama,
     kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
     imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id
   } = req.body;
@@ -272,13 +272,13 @@ app.post('/api/ilanlar', adminYetkiKontrol, async (req, res) => {
   try {
     const sonuc = await pool.query(`
       INSERT INTO ilanlar
-      (baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, resim, resimler, aciklama,
+      (baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, metrekare_brut, resim, resimler, aciklama,
        kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
        imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26)
       RETURNING id
     `, [
-      baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, anaResim, resimlerStr, aciklama,
+      baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, metrekare_brut || null, anaResim, resimlerStr, aciklama,
       kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
       imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id || null
     ]);
@@ -304,7 +304,7 @@ app.delete('/api/ilanlar/:id', adminYetkiKontrol, async (req, res) => {
 // === İLAN GÜNCELLE ===
 app.put('/api/ilanlar/:id', adminYetkiKontrol, async (req, res) => {
   const {
-    baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, resim, resimler, aciklama,
+    baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, metrekare_brut, resim, resimler, aciklama,
     kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
     imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id
   } = req.body;
@@ -316,12 +316,12 @@ app.put('/api/ilanlar/:id', adminYetkiKontrol, async (req, res) => {
     const sonuc = await pool.query(`
       UPDATE ilanlar SET
         baslik=$1, konum=$2, fiyat=$3, tip=$4, emlak_tipi=$5, oda=$6, metrekare=$7,
-        resim=$8, resimler=$9, aciklama=$10, kat=$11, bina_yasi=$12, isitma=$13, ozellikler=$14,
-        banyo=$15, teras=$16, balkon=$17, esyali=$18, site=$19,
-        imar=$20, ada_parsel=$21, cephe=$22, kredi_uygunluk=$23, takas=$24, danisman_id=$25
-      WHERE id=$26
+        metrekare_brut=$8, resim=$9, resimler=$10, aciklama=$11, kat=$12, bina_yasi=$13, isitma=$14,
+        ozellikler=$15, banyo=$16, teras=$17, balkon=$18, esyali=$19, site=$20,
+        imar=$21, ada_parsel=$22, cephe=$23, kredi_uygunluk=$24, takas=$25, danisman_id=$26
+      WHERE id=$27
     `, [
-      baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare,
+      baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, metrekare_brut || null,
       anaResim, resimlerStr, aciklama, kat, bina_yasi, isitma, ozellikler,
       banyo, teras, balkon, esyali, site,
       imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id || null,

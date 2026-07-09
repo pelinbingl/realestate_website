@@ -86,7 +86,20 @@
                 </div>
             </a>
         </div>
-        <nav><a href="/">← Siteye Dön</a></nav>
+        <nav>
+            <a href="/">← Siteye Dön</a>
+            <button onclick="cikisYap()" style="
+              background: none;
+              border: 1px solid #fff;
+              color: #fff;
+              padding: 8px 16px;
+              border-radius: 6px;
+              cursor: pointer;
+              font-weight: 600;
+              font-size: 13px;
+              margin-left: 12px;
+            ">🚪 Çıkış Yap</button>
+        </nav>
     </header>
 
     <div class="admin-container">
@@ -481,6 +494,7 @@
                     const veri = await cevap.json();
                     sessionStorage.setItem("adminToken", veri.token);
                     document.getElementById("sifre-ekrani").style.display = "none";
+                    hareketsizlikSayaciniSifirla();
                 } else {
                     throw new Error("Hatalı şifre");
                 }
@@ -493,6 +507,35 @@
         if (sessionStorage.getItem("adminToken")) {
             document.getElementById("sifre-ekrani").style.display = "none";
         }
+
+        // === ÇIKIŞ YAP ===
+        function cikisYap(otomatikMi) {
+            sessionStorage.removeItem("adminToken");
+            clearTimeout(hareketsizlikZamanlayici);
+            document.getElementById("sifre-ekrani").style.display = "flex";
+            const hataKutusu = document.getElementById("sifre-hata");
+            if (otomatikMi) {
+                hataKutusu.textContent = "⏱️ 5 dakika hareketsizlik nedeniyle oturumunuz sonlandırıldı. Lütfen tekrar giriş yapın.";
+                hataKutusu.style.display = "block";
+            } else if (hataKutusu) {
+                hataKutusu.style.display = "none";
+            }
+        }
+
+        // === 5 DAKİKA HAREKETSİZLİKTE OTOMATİK ÇIKIŞ ===
+        const HAREKETSIZLIK_SURESI = 5 * 60 * 1000; // 5 dakika
+        let hareketsizlikZamanlayici = null;
+
+        function hareketsizlikSayaciniSifirla() {
+            if (!sessionStorage.getItem("adminToken")) return; // giriş yapılmamışsa sayaç gereksiz
+            clearTimeout(hareketsizlikZamanlayici);
+            hareketsizlikZamanlayici = setTimeout(() => cikisYap(true), HAREKETSIZLIK_SURESI);
+        }
+
+        ["mousemove", "mousedown", "keydown", "scroll", "touchstart", "click"].forEach((olay) => {
+            document.addEventListener(olay, hareketsizlikSayaciniSifirla, { passive: true });
+        });
+        hareketsizlikSayaciniSifirla();
 
         // === DEĞİŞKENLER ===
         let aktifFormTip = "ev";

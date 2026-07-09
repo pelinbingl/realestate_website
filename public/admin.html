@@ -168,12 +168,12 @@
             </div>
 
             <div style="display:flex; gap:12px;">
-                <div class="form-group" style="flex:1;">
+                <div class="form-group" id="brut-metrekare-alani" style="flex:1;">
                     <label>Brüt Metrekare (m²)</label>
                     <input type="number" id="metrekare_brut" placeholder="örn: 135" />
                 </div>
                 <div class="form-group" style="flex:1;">
-                    <label>Net Metrekare (m²)</label>
+                    <label id="net-metrekare-etiket">Net Metrekare (m²)</label>
                     <input type="number" id="metrekare" placeholder="örn: 120" />
                 </div>
             </div>
@@ -567,6 +567,12 @@
                 tip === "ev" ? "block" : "none";
             document.getElementById("arsa-alanlari").style.display =
                 tip === "arsa" ? "block" : "none";
+            // Arsa/Tarla'da brüt/net ayrımı anlamsız — sadece tek metrekare kutusu göster
+            document.getElementById("brut-metrekare-alani").style.display =
+                tip === "ev" ? "block" : "none";
+            document.getElementById("net-metrekare-etiket").textContent =
+                tip === "ev" ? "Net Metrekare (m²)" : "Metrekare (m²)";
+            if (tip === "arsa") document.getElementById("metrekare_brut").value = "";
             const tipGroup = document.getElementById("tip-group");
             if (tip === "arsa") {
                 document.getElementById("tip").value = "satilik";

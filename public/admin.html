@@ -135,8 +135,14 @@
 
             <div class="form-group">
                 <label>Mahalle / Sokak / Detay (opsiyonel)</label>
-                <input type="text" id="mahalle-detay" placeholder="örn: Kazım Dirik Mahallesi"
-                    oninput="konumGuncelle()" />
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <input type="text" id="mahalle" placeholder="Mahalle" oninput="konumGuncelle()"
+                        style="flex:1; min-width:140px;" />
+                    <input type="text" id="sokak" placeholder="Sokak" oninput="konumGuncelle()"
+                        style="flex:1; min-width:140px;" />
+                    <input type="text" id="detay" placeholder="Detay (blok, no vb.)" oninput="konumGuncelle()"
+                        style="flex:1; min-width:140px;" />
+                </div>
             </div>
 
             <div class="form-group">
@@ -502,8 +508,10 @@
 
         function konumGuncelle() {
             const ilce = document.getElementById("ilce-sec").value;
-            const detay = document.getElementById("mahalle-detay").value.trim();
-            const parcalar = [detay, ilce, "İzmir"].filter(Boolean);
+            const mahalle = document.getElementById("mahalle").value.trim();
+            const sokak = document.getElementById("sokak").value.trim();
+            const detay = document.getElementById("detay").value.trim();
+            const parcalar = [mahalle, sokak, detay, ilce, "İzmir"].filter(Boolean);
             document.getElementById("konum").value = parcalar.join(", ");
         }
 
@@ -1118,7 +1126,9 @@
             mevcutResimler = [];
             document.getElementById("onizleme-grid").innerHTML = "";
             document.getElementById("resim-input").value = "";
-            document.getElementById("mahalle-detay").value = "";
+            document.getElementById("mahalle").value = "";
+            document.getElementById("sokak").value = "";
+            document.getElementById("detay").value = "";
             document.getElementById("danisman_id").value = "";
             document.getElementById("mevcut-resimler").style.display = "none";
             document.getElementById("mevcut-resimler-grid").innerHTML = "";

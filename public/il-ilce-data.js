@@ -1,0 +1,3 @@
+// İzmir ilçeleri — kaynak: TÜİK tabanlı açık veri seti (volkansenturk/turkiye-iller-ilceler)
+// Not: Bu işletme yalnızca İzmir'de faaliyet gösterdiği için sadece İzmir ilçeleri listelenir.
+const IZMIR_ILCELERI = ["Aliağa", "Balçova", "Bayındır", "Bayraklı", "Bergama", "Beydağ", "Bornova", "Buca", "Foça", "Gaziemir", "Güzelbahçe", "Karabağlar", "Karaburun", "Karşıyaka", "Kemalpaşa", "Kınık", "Kiraz", "Konak", "Menderes", "Menemen", "Narlıdere", "Seferihisar", "Selçuk", "Tire", "Torbalı", "Urla", "Çeşme", "Çiğli", "Dikili", "Ödemiş"];

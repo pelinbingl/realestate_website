@@ -7,6 +7,40 @@ function escapeHtml(str) {
   }[c]));
 }
 
+// === GÜVENLİK: Zengin metin (rich text) için beyaz liste temizleme ===
+// Admin panelindeki açıklama editöründen gelen HTML'i (kalın, italik, liste
+// vb.) render etmeden önce kullan. Sadece izin verilen birkaç biçimlendirme
+// etiketine izin verir; script/onerror/style/href gibi her türlü tehlikeli
+// içeriği (ve attribute'u) tamamen temizler.
+function sanitizeHtml(html) {
+  const izinliEtiketler = new Set(['B', 'STRONG', 'I', 'EM', 'U', 'UL', 'OL', 'LI', 'BR', 'P', 'SPAN', 'DIV']);
+  // Bunların içeriği (metni dahil) tamamen silinir — sadece etiketi kaldırıp
+  // metnini sayfada bırakmak script/style için anlamsız ve gereksizdir.
+  const tamamenSilinecek = new Set(['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'NOSCRIPT']);
+  const gecici = document.createElement('div');
+  gecici.innerHTML = String(html ?? '');
+
+  function temizle(node) {
+    [...node.childNodes].forEach(child => {
+      if (child.nodeType === 1) {
+        if (tamamenSilinecek.has(child.tagName)) {
+          node.removeChild(child);
+        } else if (!izinliEtiketler.has(child.tagName)) {
+          while (child.firstChild) node.insertBefore(child.firstChild, child);
+          node.removeChild(child);
+        } else {
+          [...child.attributes].forEach(attr => child.removeAttribute(attr.name));
+          temizle(child);
+        }
+      } else if (child.nodeType !== 3) {
+        node.removeChild(child);
+      }
+    });
+  }
+  temizle(gecici);
+  return gecici.innerHTML;
+}
+
 // === ORTAK HEADER ===
 function headerYukle() {
   const mevcutSayfa = window.location.pathname;

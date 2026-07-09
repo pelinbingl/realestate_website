@@ -65,7 +65,7 @@
                 </div>
 
                 <div class="sekme-icerik aktif-icerik" id="sekme-aciklama">
-                    <p id="detay-aciklama-metin"></p>
+                    <div id="detay-aciklama-metin"></div>
                 </div>
 
                 <div class="sekme-icerik" id="sekme-konum">
@@ -227,8 +227,9 @@
             document.getElementById('detay-tarih').textContent = 'İlan Tarihi: ' + tarihStr;
 
             // === AÇIKLAMA ===
-            document.getElementById('detay-aciklama-metin').textContent =
-                ilan.aciklama || 'Bu ilan için açıklama girilmemiş.';
+            document.getElementById('detay-aciklama-metin').innerHTML = ilan.aciklama
+                ? sanitizeHtml(ilan.aciklama)
+                : 'Bu ilan için açıklama girilmemiş.';
 
             // === HARİTA ===
             // === HARİTA ===

@@ -129,142 +129,20 @@
             </div>
 
             <div class="form-group">
-                <label>Konum</label>
-                <textarea id="konum" rows="2" placeholder="örn: İzmir, Aliağa" style="margin-bottom: 8px"></textarea>
-                <button type="button" onclick="haritaAc()" style="
-              background: #f9e01a;
-              color: #111;
-              border: none;
-              padding: 12px 18px;
-              border-radius: 8px;
-              cursor: pointer;
-              font-weight: 700;
-              font-size: 14px;
-              display: flex;
-              align-items: center;
-              gap: 6px;
-            ">
-                    🗺️ Haritadan Seç
-                </button>
+                <label>İlçe (İzmir)</label>
+                <select id="ilce-sec" onchange="konumGuncelle()"></select>
             </div>
-            <!-- HARİTA MODAL -->
-            <div id="harita-modal" style="
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-          ">
-                <div style="
-              background: #fff;
-              border-radius: 16px;
-              width: 92%;
-              max-width: 750px;
-              overflow: hidden;
-              box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
-            ">
-                    <div style="
-                background: #111;
-                color: #fff;
-                padding: 16px 20px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-              ">
-                        <div>
-                            <span style="font-weight: 700; font-size: 16px">🗺️ Haritadan Konum Seç</span>
-                            <p style="font-size: 12px; color: #aaa; margin: 2px 0 0">
-                                Haritaya tıkla veya pini sürükle
-                            </p>
-                        </div>
-                        <button onclick="haritaKapat()" style="
-                  background: none;
-                  border: none;
-                  color: #fff;
-                  font-size: 24px;
-                  cursor: pointer;
-                  line-height: 1;
-                ">
-                            ✕
-                        </button>
-                    </div>
-                    <div style="
-                padding: 12px 16px;
-                border-bottom: 1px solid #eee;
-                display: flex;
-                gap: 8px;
-              ">
-                        <input type="text" id="harita-arama" placeholder="Adres, mahalle veya sokak ara..." style="
-                  flex: 1;
-                  padding: 10px 14px;
-                  border: 2px solid #ddd;
-                  border-radius: 8px;
-                  font-size: 14px;
-                  outline: none;
-                " onfocus="this.style.borderColor = '#f9e01a'" onblur="this.style.borderColor = '#ddd'" />
-                        <button onclick="haritaAra()" style="
-                  background: #f9e01a;
-                  color: #111;
-                  border: none;
-                  padding: 10px 20px;
-                  border-radius: 8px;
-                  cursor: pointer;
-                  font-weight: 700;
-                  font-size: 14px;
-                ">
-                            Ara
-                        </button>
-                    </div>
-                    <div id="google-map" style="width: 100%; height: 420px"></div>
-                    <div style="
-                padding: 14px 16px;
-                background: #f9f9f9;
-                border-top: 1px solid #eee;
-              ">
-                        <div style="display: flex; gap: 10px; align-items: center">
-                            <div style="flex: 1">
-                                <p style="font-size: 11px; color: #999; margin: 0 0 6px">
-                                    Seçilen Konum:
-                                    <span style="color: #f9a01a">(düzenleyebilirsiniz)</span>
-                                </p>
-                                <input type="text" id="secilen-adres"
-                                    placeholder="📍 Haritaya tıklayarak konum seçin..." style="
-                      width: 100%;
-                      padding: 9px 12px;
-                      border: 2px solid #ddd;
-                      border-radius: 8px;
-                      font-size: 14px;
-                      font-weight: 600;
-                      color: #111;
-                      outline: none;
-                      box-sizing: border-box;
-                    " onfocus="this.style.borderColor = '#f9e01a'" onblur="this.style.borderColor = '#ddd'" oninput="
-                      seciliAdres = this.value;
-                      btnAktifGuncelle();
-                    " />
-                            </div>
-                            <button onclick="konumuOnayla()" id="onayla-btn" disabled style="
-                    background: #ccc;
-                    color: #fff;
-                    border: none;
-                    padding: 12px 24px;
-                    border-radius: 8px;
-                    cursor: not-allowed;
-                    font-weight: 700;
-                    font-size: 14px;
-                    transition: all 0.2s;
-                    white-space: nowrap;
-                  ">
-                                ✅ Seç
-                            </button>
-                        </div>
-                    </div>
-                </div>
+
+            <div class="form-group">
+                <label>Mahalle / Sokak / Detay (opsiyonel)</label>
+                <input type="text" id="mahalle-detay" placeholder="örn: Kazım Dirik Mahallesi"
+                    oninput="konumGuncelle()" />
+            </div>
+
+            <div class="form-group">
+                <label>Konum <span style="color:#999;font-weight:400;font-size:12px">(ilçe seçince otomatik dolar,
+                        istersen elle düzenle)</span></label>
+                <textarea id="konum" rows="2" placeholder="örn: İzmir, Aliağa"></textarea>
             </div>
 
             <div class="form-group">
@@ -451,7 +329,7 @@
                     <span style="color: #f9a01a; font-size: 13px">Kapak için fotoğrafa tıkla</span></label>
                 <div id="mevcut-resimler" style="display: none; margin-bottom: 12px">
                     <p style="font-size: 12px; color: #777; margin-bottom: 6px">
-                        📌 Mevcut resimler (yeni yüklersen değişir):
+                        📌 Mevcut resimler — silmek için ✕'e, kapak yapmak için fotoğrafa tıkla:
                     </p>
                     <div id="mevcut-resimler-grid" style="display: flex; gap: 6px; flex-wrap: wrap"></div>
                 </div>
@@ -469,7 +347,27 @@
 
             <div class="form-group">
                 <label>Açıklama (opsiyonel)</label>
-                <textarea id="aciklama" rows="3" placeholder="İlan hakkında kısa açıklama..."></textarea>
+                <div class="editor-toolbar"
+                    style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;background:#f5f5f5;padding:6px;border-radius:8px 8px 0 0;border:1px solid #ddd;border-bottom:none;">
+                    <button type="button" onclick="editorKomut('bold')" title="Kalın"
+                        style="font-weight:700;width:32px;height:32px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;">B</button>
+                    <button type="button" onclick="editorKomut('italic')" title="İtalik"
+                        style="font-style:italic;width:32px;height:32px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;">I</button>
+                    <button type="button" onclick="editorKomut('underline')" title="Altı çizili"
+                        style="text-decoration:underline;width:32px;height:32px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;">U</button>
+                    <button type="button" onclick="editorKomut('insertUnorderedList')" title="Madde işaretli liste"
+                        style="width:32px;height:32px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;">•≡</button>
+                    <button type="button" onclick="editorKomut('insertOrderedList')" title="Numaralı liste"
+                        style="width:32px;height:32px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;">1≡</button>
+                    <button type="button" onclick="editorKomut('removeFormat')" title="Biçimlendirmeyi temizle"
+                        style="width:32px;height:32px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;">✕</button>
+                </div>
+                <div id="aciklama-editor" contenteditable="true"
+                    style="min-height:90px;border:2px solid #ddd;border-top:1px solid #ddd;border-radius:0 0 8px 8px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;"
+                    oninput="document.getElementById('aciklama').value = document.getElementById('aciklama-editor').innerHTML"
+                    onfocus="this.style.borderColor='#f9e01a'" onblur="this.style.borderColor='#ddd'"
+                    data-placeholder="İlan hakkında kısa açıklama..."></div>
+                <textarea id="aciklama" style="display:none"></textarea>
             </div>
 
             <div id="mesaj" class="admin-mesaj" style="display: none"></div>
@@ -537,6 +435,7 @@
         </div>
     </div>
 
+    <script src="il-ilce-data.js"></script>
     <script>
         // === ŞİFRE KORUMA (sunucu tarafında doğrulanır) ===
         // Tüm fetch çağrılarına otomatik olarak admin token'ı ekler,
@@ -581,178 +480,42 @@
         let aktifFormTip = "ev";
         let seciliDosyalar = [];
         let anaResimIndex = 0;
-        let googleMap = null;
-        let marker = null;
-        let geocoder = null;
-        let seciliAdres = "";
-        let autocomplete = null;
+        let anaResimTipi = "yeni"; // "mevcut" (düzenlemedeki eski fotoğraf) veya "yeni" (az önce eklenen)
         let duzenlemeModu = false;
         let duzenleIlanId = null;
         let mevcutResimler = [];
 
-        // === GOOGLE MAPS ===
-        let googleMapsReady = false;
-
-        async function googleMapsYukle() {
-            try {
-                const cevap = await fetch("/api/config");
-                const config = await cevap.json();
-
-                await new Promise((resolve, reject) => {
-                    const script = document.createElement("script");
-                    script.src = `https://maps.googleapis.com/maps/api/js?key=${config.googleMapsKey}&libraries=places&language=tr`;
-
-                    script.onload = () => {
-                        googleMapsReady = true;
-                        resolve();
-                    };
-
-                    script.onerror = () => reject("Google Maps script yüklenemedi");
-
-                    document.head.appendChild(script);
-                });
-            } catch (hata) {
-                console.error("Google Maps yüklenemedi:", hata);
-            }
-        }
-        googleMapsYukle();
-
-        function btnAktifGuncelle() {
-            const deger = document.getElementById("secilen-adres").value.trim();
-            const btn = document.getElementById("onayla-btn");
-            if (deger) {
-                btn.disabled = false;
-                btn.style.background = "#111";
-                btn.style.cursor = "pointer";
-            } else {
-                btn.disabled = true;
-                btn.style.background = "#ccc";
-                btn.style.cursor = "not-allowed";
-            }
-        }
-
-        function haritaAc() {
-            document.getElementById("harita-modal").style.display = "flex";
-
-            const bekle = () => {
-                if (!googleMapsReady || typeof google === "undefined") {
-                    setTimeout(bekle, 200);
-                    return;
-                }
-
-                if (!googleMap) haritaOlustur();
-                else {
-                    const k = document.getElementById("konum").value.trim();
-                    if (k) konumaGit(k);
-                }
-            };
-
-            setTimeout(bekle, 200);
-        }
-        function haritaOlustur() {
-            if (typeof google === "undefined") {
-                setTimeout(() => {
-                    haritaOlustur();
-                }, 300);
-                return;
-            }
-            geocoder = new google.maps.Geocoder();
-            const merkez = { lat: 38.8028, lng: 26.9736 };
-            googleMap = new google.maps.Map(document.getElementById("google-map"), {
-                center: merkez,
-                zoom: 13,
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false,
+        // === İLÇE SEÇİMİ (yalnızca İzmir) ===
+        function illeriDoldur() {
+            const ilceSec = document.getElementById("ilce-sec");
+            ilceSec.innerHTML = "";
+            IZMIR_ILCELERI.forEach((ilce) => {
+                const opt = document.createElement("option");
+                opt.value = ilce;
+                opt.textContent = ilce;
+                ilceSec.appendChild(opt);
             });
-            marker = new google.maps.Marker({
-                position: merkez,
-                map: googleMap,
-                draggable: true,
-                animation: google.maps.Animation.DROP,
-            });
-            marker.addListener("dragend", () => {
-                const p = marker.getPosition();
-                koordinattenAdresAl(p.lat(), p.lng());
-            });
-            googleMap.addListener("click", (e) => {
-                marker.setPosition(e.latLng);
-                koordinattenAdresAl(e.latLng.lat(), e.latLng.lng());
-            });
-            autocomplete = new google.maps.places.Autocomplete(
-                document.getElementById("harita-arama"),
-                { componentRestrictions: { country: "tr" } },
-            );
-            autocomplete.addListener("place_changed", () => {
-                const place = autocomplete.getPlace();
-                if (!place.geometry) return;
-                googleMap.setCenter(place.geometry.location);
-                googleMap.setZoom(16);
-                marker.setPosition(place.geometry.location);
-                adresGuncelle(place.formatted_address || place.name);
-            });
-            const k = document.getElementById("konum").value.trim();
-            if (k) konumaGit(k);
+            // Bu işletme çoğunlukla Aliağa'da faaliyet gösterdiği için varsayılan
+            ilceSec.value = "Aliağa";
+            konumGuncelle();
         }
 
-        function koordinattenAdresAl(lat, lng) {
-            if (!geocoder) return;
-            geocoder.geocode(
-                { location: { lat, lng }, language: "tr" },
-                (results, status) => {
-                    if (status === "OK" && results[0])
-                        adresGuncelle(results[0].formatted_address);
-                },
-            );
+        function konumGuncelle() {
+            const ilce = document.getElementById("ilce-sec").value;
+            const detay = document.getElementById("mahalle-detay").value.trim();
+            const parcalar = [detay, ilce, "İzmir"].filter(Boolean);
+            document.getElementById("konum").value = parcalar.join(", ");
         }
 
-        function adresGuncelle(adres) {
-            seciliAdres = adres;
-            document.getElementById("secilen-adres").value = adres;
-            btnAktifGuncelle();
+        // === AÇIKLAMA ZENGİN METİN EDİTÖRÜ ===
+        function editorKomut(komut) {
+            document.getElementById("aciklama-editor").focus();
+            document.execCommand(komut, false, null);
+            document.getElementById("aciklama").value =
+                document.getElementById("aciklama-editor").innerHTML;
         }
 
-        function haritaAra() {
-            const aranan = document.getElementById("harita-arama").value.trim();
-            if (!aranan) return;
-            konumaGit(aranan);
-        }
-
-        function konumaGit(adres) {
-            if (!geocoder) geocoder = new google.maps.Geocoder();
-            const sorgu = adres.toLowerCase().includes("türkiye")
-                ? adres
-                : adres + ", Türkiye";
-            geocoder.geocode(
-                { address: sorgu, language: "tr" },
-                (results, status) => {
-                    if (status === "OK" && results[0]) {
-                        const k = results[0].geometry.location;
-                        googleMap.setCenter(k);
-                        googleMap.setZoom(16);
-                        marker.setPosition(k);
-                        adresGuncelle(results[0].formatted_address);
-                    }
-                },
-            );
-        }
-
-        function konumuOnayla() {
-            const adres = document.getElementById("secilen-adres").value.trim();
-            if (!adres) return;
-            document.getElementById("konum").value = adres;
-            haritaKapat();
-        }
-
-        function haritaKapat() {
-            document.getElementById("harita-modal").style.display = "none";
-        }
-
-        document
-            .getElementById("harita-modal")
-            .addEventListener("click", function (e) {
-                if (e.target === this) haritaKapat();
-            });
+        illeriDoldur();
 
         function formTipSec(buton, tip) {
             aktifFormTip = tip;
@@ -786,28 +549,57 @@
 
         function resimSecildi(dosyalar) {
             const yeni = Array.from(dosyalar);
-            if (seciliDosyalar.length + yeni.length > 35) {
+            if (mevcutResimler.length + seciliDosyalar.length + yeni.length > 35) {
                 alert("En fazla 35 fotoğraf!");
                 return;
             }
             seciliDosyalar = [...seciliDosyalar, ...yeni];
-            onizlemeGoster();
+            resimGridleriGuncelle();
         }
 
-        function anaResimSec(index) {
+        function anaResimSec(tip, index) {
+            anaResimTipi = tip;
             anaResimIndex = index;
-            onizlemeGoster();
+            resimGridleriGuncelle();
         }
 
-        function onizlemeGoster() {
+        // Hem "mevcut" (düzenlemedeki eski) hem "yeni" (az önce eklenen)
+        // fotoğrafları tek bir görünümde, ikisi de silinebilir/kapak
+        // seçilebilir şekilde günceller.
+        function resimGridleriGuncelle() {
+            // Mevcut (düzenlemedeki eski) fotoğraflar
+            const mevcutGrid = document.getElementById("mevcut-resimler-grid");
+            const mevcutKutu = document.getElementById("mevcut-resimler");
+            if (mevcutResimler.length > 0) {
+                mevcutKutu.style.display = "block";
+                mevcutGrid.innerHTML = mevcutResimler
+                    .map((url, index) => {
+                        const kapakMi = anaResimTipi === "mevcut" && index === anaResimIndex;
+                        return `
+                        <div class="onizleme-kart ${kapakMi ? "ana-resim-secili" : ""}"
+                             onclick="anaResimSec('mevcut', ${index})" style="cursor:pointer;">
+                            <img src="${url.trim()}" alt="Mevcut resim ${index + 1}">
+                            <button class="onizleme-sil" onclick="event.stopPropagation(); mevcutResimSil(${index})">✕</button>
+                            <span class="ana-resim-etiket" style="${kapakMi ? "" : "background:#999;"}">
+                                ${kapakMi ? "⭐ Kapak" : "Kapak Seç"}
+                            </span>
+                        </div>`;
+                    })
+                    .join("");
+            } else {
+                mevcutKutu.style.display = "none";
+                mevcutGrid.innerHTML = "";
+            }
+
+            // Yeni eklenen fotoğraflar
             const grid = document.getElementById("onizleme-grid");
             grid.innerHTML = seciliDosyalar
                 .map((dosya, index) => {
                     const url = URL.createObjectURL(dosya);
-                    const kapakMi = index === anaResimIndex;
+                    const kapakMi = anaResimTipi === "yeni" && index === anaResimIndex;
                     return `
                     <div class="onizleme-kart ${kapakMi ? "ana-resim-secili" : ""}"
-                         id="onizleme-${index}" onclick="anaResimSec(${index})" style="cursor:pointer;">
+                         id="onizleme-${index}" onclick="anaResimSec('yeni', ${index})" style="cursor:pointer;">
                         <img src="${url}" alt="Önizleme ${index + 1}">
                         <button class="onizleme-sil" onclick="event.stopPropagation(); resimSil(${index})">✕</button>
                         <span class="ana-resim-etiket" style="${kapakMi ? "" : "background:#999;"}">
@@ -818,10 +610,35 @@
                 .join("");
         }
 
+        // Geriye dönük uyumluluk için eski isim de aynı fonksiyona işaret etsin
+        function onizlemeGoster() {
+            resimGridleriGuncelle();
+        }
+
         function resimSil(index) {
             seciliDosyalar.splice(index, 1);
-            if (anaResimIndex >= seciliDosyalar.length) anaResimIndex = 0;
-            onizlemeGoster();
+            if (anaResimTipi === "yeni") {
+                if (seciliDosyalar.length === 0) {
+                    // Silinecek yeni fotoğraf kalmadıysa, mevcut fotoğraf varsa ona geç
+                    if (mevcutResimler.length > 0) { anaResimTipi = "mevcut"; anaResimIndex = 0; }
+                } else if (anaResimIndex >= seciliDosyalar.length) {
+                    anaResimIndex = seciliDosyalar.length - 1;
+                }
+            }
+            resimGridleriGuncelle();
+        }
+
+        function mevcutResimSil(index) {
+            mevcutResimler.splice(index, 1);
+            if (anaResimTipi === "mevcut") {
+                if (mevcutResimler.length === 0) {
+                    // Silinecek mevcut fotoğraf kalmadıysa, yeni fotoğraf varsa ona geç
+                    if (seciliDosyalar.length > 0) { anaResimTipi = "yeni"; anaResimIndex = 0; }
+                } else if (anaResimIndex >= mevcutResimler.length) {
+                    anaResimIndex = mevcutResimler.length - 1;
+                }
+            }
+            resimGridleriGuncelle();
         }
 
         // === DÜZENLEME MODUNA GEÇ ===
@@ -843,6 +660,7 @@
             document.getElementById("fiyat").value = ilan.fiyat || "";
             document.getElementById("metrekare").value = ilan.metrekare || "";
             document.getElementById("aciklama").value = ilan.aciklama || "";
+            document.getElementById("aciklama-editor").innerHTML = ilan.aciklama || "";
             document.getElementById("tip").value = ilan.tip || "satilik";
             document.getElementById("danisman_id").value = ilan.danisman_id || "";
 
@@ -898,18 +716,10 @@
                 : ilan.resim
                     ? [ilan.resim]
                     : [];
-
-            if (mevcutResimler.length > 0) {
-                document.getElementById("mevcut-resimler").style.display = "block";
-                document.getElementById("mevcut-resimler-grid").innerHTML =
-                    mevcutResimler
-                        .map(
-                            (url) => `
-                    <img src="${url.trim()}" style="width:60px;height:45px;object-fit:cover;border-radius:4px;border:2px solid #f9e01a;">
-                `,
-                        )
-                        .join("");
-            }
+            seciliDosyalar = [];
+            anaResimTipi = "mevcut";
+            anaResimIndex = 0;
+            resimGridleriGuncelle();
 
             document
                 .querySelector(".admin-form-section")
@@ -921,6 +731,10 @@
             duzenlemeModu = false;
             duzenleIlanId = null;
             mevcutResimler = [];
+            seciliDosyalar = [];
+            anaResimTipi = "yeni";
+            anaResimIndex = 0;
+            document.getElementById("onizleme-grid").innerHTML = "";
             document.getElementById("form-baslik").textContent =
                 "➕ Yeni İlan Ekle";
             document.getElementById("kaydet-btn").textContent = "➕ İlanı Ekle";
@@ -1060,7 +874,8 @@
             const fiyat = Number(document.getElementById("fiyat").value);
             const tip = document.getElementById("tip").value;
             const metrekare = Number(document.getElementById("metrekare").value);
-            const aciklama = document.getElementById("aciklama").value.trim();
+            const aciklamaEditor = document.getElementById("aciklama-editor");
+            const aciklama = aciklamaEditor.textContent.trim() ? aciklamaEditor.innerHTML.trim() : "";
 
             if (!baslik || !konum || !fiyat || !metrekare) {
                 mesajGoster(
@@ -1069,28 +884,32 @@
                 );
                 return;
             }
-            if (!duzenlemeModu && seciliDosyalar.length === 0) {
+            if (mevcutResimler.length === 0 && seciliDosyalar.length === 0) {
                 mesajGoster("❌ En az 1 fotoğraf ekleyin!", "hata");
                 return;
             }
 
-            let resimUrls = [];
+            let yeniYuklenenUrls = [];
             if (seciliDosyalar.length > 0) {
                 try {
-                    resimUrls = await resimleriYukle();
+                    yeniYuklenenUrls = await resimleriYukle();
                 } catch (hata) {
                     mesajGoster("❌ Resim yüklenirken hata: " + hata.message, "hata");
                     return;
                 }
-            } else {
-                resimUrls = mevcutResimler;
             }
 
-            const anaIdx = seciliDosyalar.length > 0 ? anaResimIndex : 0;
-            const kapakUrl = resimUrls[anaIdx];
+            // Mevcut (silinmemiş) + yeni yüklenen resimler birleştirilir
+            const resimUrls = [...mevcutResimler, ...yeniYuklenenUrls];
+
+            const kapakIndex =
+                anaResimTipi === "mevcut"
+                    ? anaResimIndex
+                    : mevcutResimler.length + anaResimIndex;
+            const kapakUrl = resimUrls[kapakIndex] || resimUrls[0];
             const siraliResimler = [
                 kapakUrl,
-                ...resimUrls.filter((_, i) => i !== anaIdx),
+                ...resimUrls.filter((_, i) => i !== kapakIndex),
             ];
 
             let ilanVerisi = {
@@ -1295,18 +1114,16 @@
             });
             seciliDosyalar = [];
             anaResimIndex = 0;
-            seciliAdres = "";
+            anaResimTipi = "yeni";
+            mevcutResimler = [];
             document.getElementById("onizleme-grid").innerHTML = "";
             document.getElementById("resim-input").value = "";
-            document.getElementById("harita-arama").value = "";
-            document.getElementById("secilen-adres").value = "";
+            document.getElementById("mahalle-detay").value = "";
             document.getElementById("danisman_id").value = "";
             document.getElementById("mevcut-resimler").style.display = "none";
             document.getElementById("mevcut-resimler-grid").innerHTML = "";
-            const btn = document.getElementById("onayla-btn");
-            btn.disabled = true;
-            btn.style.background = "#ccc";
-            btn.style.cursor = "not-allowed";
+            document.getElementById("aciklama-editor").innerHTML = "";
+            illeriDoldur();
         }
     </script>
 </body>

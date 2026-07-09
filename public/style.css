@@ -2234,6 +2234,7 @@ img {
         align-items: center;
     }
 }
+
 /* ============================================================
    MOBİL & WEB UYUM DÜZELTMELERİ — style.css'in EN ALTINA EKLE
    ============================================================ */
@@ -2367,4 +2368,16 @@ img {
         height: 45px;
         flex-shrink: 0;
     }
+}
+
+/* === Açıklama zengin metin editörü === */
+#aciklama-editor:empty:before {
+    content: attr(data-placeholder);
+    color: #999;
+}
+
+#aciklama-editor ul,
+#aciklama-editor ol {
+    margin: 8px 0;
+    padding-left: 22px;
 }

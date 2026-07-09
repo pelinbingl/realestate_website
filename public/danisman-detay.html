@@ -11,6 +11,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danışman Detay | Emlak Durağı</title>
+    <meta name="description" content="Emlak Durağı gayrimenkul danışmanlarımızın iletişim bilgileri ve ilan portföyü.">
+    <link rel="canonical" href="https://www.emlakduragim.com/danisman-detay">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Danışman Detay | Emlak Durağı">
+    <meta property="og:description"
+        content="Emlak Durağı gayrimenkul danışmanlarımızın iletişim bilgileri ve ilan portföyü.">
+    <meta property="og:url" content="https://www.emlakduragim.com/danisman-detay">
+    <meta property="og:image" content="https://www.emlakduragim.com/icon-512.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Danışman Detay | Emlak Durağı">
+    <meta name="twitter:description"
+        content="Emlak Durağı gayrimenkul danışmanlarımızın iletişim bilgileri ve ilan portföyü.">
+    <meta name="twitter:image" content="https://www.emlakduragim.com/icon-512.png">
     <link rel="stylesheet" href="style.css">
     <style>
         /* === GENEL DEĞİŞİKLİKLER & ARKA PLAN === */
@@ -696,7 +710,7 @@
             container.innerHTML = ilanlar.map(ilan => `
             <div class="detay-ilan-satir" id="ilan-satir-${ilan.id}">
                 <div class="detay-ilan-sol">
-                    <img src="${escapeHtml(ilan.resim || '')}" alt="" onerror="this.style.display='none'" style="${ilan.resim ? '' : 'display:none'}">
+                    <img src="${escapeHtml(ilan.resim || '')}" alt="" loading="lazy" onerror="this.style.display='none'" style="${ilan.resim ? '' : 'display:none'}">
                     ${!ilan.resim ? `<div style="width:100px;height:75px;background:#f0f0f0;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🏠</div>` : ''}
                     <div class="detay-ilan-bilgi">
                         <strong title="${escapeHtml(ilan.baslik)}">${escapeHtml(ilan.baslik)}</strong>

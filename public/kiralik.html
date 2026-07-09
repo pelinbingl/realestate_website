@@ -11,6 +11,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kiralık İlanlar | Emlak Durağı</title>
+    <meta name="description"
+        content="Aliağa ve İzmir'de kiralık daire ve residence ilanları. Uygun fiyatlı, güncel kiralık ev seçenekleri Emlak Durağı'nda.">
+    <link rel="canonical" href="https://www.emlakduragim.com/kiralik">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Kiralık İlanlar | Emlak Durağı">
+    <meta property="og:description"
+        content="Aliağa ve İzmir'de kiralık daire ve residence ilanları. Uygun fiyatlı, güncel kiralık ev seçenekleri Emlak Durağı'nda.">
+    <meta property="og:url" content="https://www.emlakduragim.com/kiralik">
+    <meta property="og:image" content="https://www.emlakduragim.com/icon-512.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Kiralık İlanlar | Emlak Durağı">
+    <meta name="twitter:description"
+        content="Aliağa ve İzmir'de kiralık daire ve residence ilanları. Uygun fiyatlı, güncel kiralık ev seçenekleri Emlak Durağı'nda.">
+    <meta name="twitter:image" content="https://www.emlakduragim.com/icon-512.png">
     <link rel="stylesheet" href="style.css">
     <script src="components.js"></script>
 </head>
@@ -141,7 +156,7 @@
                 return `
                     <div class="liste-kart" onclick="window.location.href='/ilan-detay?id=${ilan.id}'">
                         <div class="liste-kart-resim">
-                            <img src="${resim}" alt="${escapeHtml(ilan.baslik)}">
+                            <img src="${resim}" alt="${escapeHtml(ilan.baslik)}" loading="lazy">
                             <span class="liste-tip-badge">${escapeHtml(ilan.emlak_tipi)}</span>
                         </div>
                         <div class="liste-kart-bilgi">

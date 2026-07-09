@@ -27,6 +27,41 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+// === SITEMAP.XML (dinamik) ===
+// Statik sayfalara ek olarak veritabanındaki her ilan ve danışman için
+// otomatik satır üretir; yeni ilan eklendikçe elle güncellemeye gerek kalmaz.
+app.get('/sitemap.xml', async (req, res) => {
+  const site = 'https://www.emlakduragim.com';
+  const statikSayfalar = ['', '/satilik', '/kiralik', '/hakkimizda', '/iletisim'];
+
+  try {
+    const [ilanlar, danismanlar] = await Promise.all([
+      pool.query('SELECT id, tarih FROM ilanlar ORDER BY id DESC'),
+      pool.query('SELECT id FROM danismanlar ORDER BY id ASC')
+    ]);
+
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+
+    for (const yol of statikSayfalar) {
+      const tamYol = yol === '' ? '/' : yol;
+      xml += `  <url><loc>${site}${tamYol}</loc><changefreq>daily</changefreq></url>\n`;
+    }
+    for (const ilan of ilanlar.rows) {
+      const tarih = ilan.tarih ? new Date(ilan.tarih).toISOString().split('T')[0] : '';
+      xml += `  <url><loc>${site}/ilan-detay?id=${ilan.id}</loc>${tarih ? `<lastmod>${tarih}</lastmod>` : ''}<changefreq>weekly</changefreq></url>\n`;
+    }
+    for (const d of danismanlar.rows) {
+      xml += `  <url><loc>${site}/danisman-detay?id=${d.id}</loc><changefreq>weekly</changefreq></url>\n`;
+    }
+    xml += '</urlset>';
+
+    res.type('application/xml').send(xml);
+  } catch (hata) {
+    console.error('Sitemap oluşturulamadı:', hata);
+    res.status(500).send('Sitemap oluşturulamadı');
+  }
+});
+
 // Admin girişine karşı brute-force koruması: 10 dakikada en fazla 5 deneme
 const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
@@ -129,6 +164,8 @@ app.get('/api/config', (req, res) => {
 // ilk baytlarına (magic bytes) bakarak doğrular. Uzantı/MIME sahteciliğine
 // (ör. .png gibi görünen ama içi <script> dolu bir SVG/HTML dosyası) karşı
 // son savunma katmanı.
+const sharp = require('sharp');
+
 function gercekResimMi(buffer) {
   const hex = buffer.subarray(0, 12).toString('hex');
   const isJPEG = hex.startsWith('ffd8ff');
@@ -150,12 +187,19 @@ app.post('/api/resim-yukle', adminYetkiKontrol, upload.array('resimler', 35), as
   try {
     const urls = [];
     for (const f of req.files) {
-      const uzanti = path.extname(f.originalname).toLowerCase();
-      const dosyaAdi = `${Date.now()}-${Math.round(Math.random() * 1e9)}${uzanti}`;
+      // Sitenin hızlı yüklenmesi için: en fazla 1600px genişlik, kaliteli
+      // ama sıkıştırılmış JPEG'e çevir. Telefon kameralarından gelen
+      // 4-8MB'lık orijinal fotoğraflar bu sayede birkaç yüz KB'a iner.
+      const sikistirilmis = await sharp(f.buffer)
+        .resize({ width: 1600, withoutEnlargement: true })
+        .jpeg({ quality: 78, mozjpeg: true })
+        .toBuffer();
+
+      const dosyaAdi = `${Date.now()}-${Math.round(Math.random() * 1e9)}.jpg`;
 
       const { error } = await supabase.storage
         .from(RESIM_BUCKET)
-        .upload(dosyaAdi, f.buffer, { contentType: f.mimetype, upsert: false });
+        .upload(dosyaAdi, sikistirilmis, { contentType: 'image/jpeg', upsert: false });
 
       if (error) throw error;
 

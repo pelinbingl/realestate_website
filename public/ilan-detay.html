@@ -11,6 +11,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>İlan Detay | Emlak Durağı</title>
+    <meta name="description"
+        content="Emlak Durağı güvencesiyle satılık ve kiralık gayrimenkul ilanı detayları, fotoğraflar ve iletişim bilgileri.">
+    <link rel="canonical" href="https://www.emlakduragim.com/ilan-detay">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="İlan Detay | Emlak Durağı">
+    <meta property="og:description"
+        content="Emlak Durağı güvencesiyle satılık ve kiralık gayrimenkul ilanı detayları, fotoğraflar ve iletişim bilgileri.">
+    <meta property="og:url" content="https://www.emlakduragim.com/ilan-detay">
+    <meta property="og:image" content="https://www.emlakduragim.com/icon-512.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="İlan Detay | Emlak Durağı">
+    <meta name="twitter:description"
+        content="Emlak Durağı güvencesiyle satılık ve kiralık gayrimenkul ilanı detayları, fotoğraflar ve iletişim bilgileri.">
+    <meta name="twitter:image" content="https://www.emlakduragim.com/icon-512.png">
     <link rel="stylesheet" href="style.css">
     <script src="components.js"></script>
 </head>
@@ -152,6 +167,22 @@
         function sayfayiDoldur(ilan) {
             document.title = ilan.baslik + ' | Emlak Durağı';
 
+            // Meta etiketlerini bu ilana özel bilgilerle güncelle (paylaşım önizlemeleri için)
+            const dinamikAciklama = `${ilan.baslik} — ${ilan.konum}. ${ilan.metrekare ? ilan.metrekare + ' m², ' : ''}${Number(ilan.fiyat).toLocaleString('tr-TR')} ₺. Emlak Durağı güvencesiyle.`;
+            const setMeta = (selector, attr, deger) => {
+                const el = document.querySelector(selector);
+                if (el) el.setAttribute(attr, deger);
+            };
+            setMeta('meta[name="description"]', 'content', dinamikAciklama);
+            setMeta('meta[property="og:title"]', 'content', ilan.baslik + ' | Emlak Durağı');
+            setMeta('meta[property="og:description"]', 'content', dinamikAciklama);
+            setMeta('meta[name="twitter:title"]', 'content', ilan.baslik + ' | Emlak Durağı');
+            setMeta('meta[name="twitter:description"]', 'content', dinamikAciklama);
+            if (ilan.resim) {
+                setMeta('meta[property="og:image"]', 'content', ilan.resim);
+                setMeta('meta[name="twitter:image"]', 'content', ilan.resim);
+            }
+
             // === RESİMLER ===
             const tumResimler = ilan.resimler
                 ? ilan.resimler.split(',').filter(r => r.trim())
@@ -164,6 +195,7 @@
             if (tumResimler.length > 1) {
                 thumbContainer.innerHTML = tumResimler.map((url, i) => `
                     <img src="${escapeHtml(url.trim())}"
+                         loading="lazy"
                          class="${i === 0 ? 'aktif-thumb' : ''}"
                          data-url="${escapeHtml(url.trim())}"
                          alt="Resim ${i + 1}">
@@ -318,7 +350,7 @@
                     return `
                         <div class="card" onclick="window.location.href='/ilan-detay?id=${i.id}'" style="cursor:pointer;">
                             <div class="card-img-wrap">
-                                <img src="${resim}" alt="${escapeHtml(i.baslik)}">
+                                <img src="${resim}" alt="${escapeHtml(i.baslik)}" loading="lazy">
                                 <span class="badge ${i.tip === 'kiralik' ? 'kiralik-badge' : 'satilik-badge'}">
                                     ${i.tip === 'kiralik' ? 'Kiralık' : 'Satılık'}
                                 </span>

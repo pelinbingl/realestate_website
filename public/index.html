@@ -11,6 +11,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emlak Durağı | Gayrimenkul Danışmanlığı</title>
+    <meta name="description"
+        content="Aliağa ve İzmir genelinde satılık ve kiralık daire, villa, arsa ilanları. Emlak Durağı ile hayalinizdeki evi güvenle bulun.">
+    <link rel="canonical" href="https://www.emlakduragim.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Emlak Durağı | Gayrimenkul Danışmanlığı">
+    <meta property="og:description"
+        content="Aliağa ve İzmir genelinde satılık ve kiralık daire, villa, arsa ilanları. Emlak Durağı ile hayalinizdeki evi güvenle bulun.">
+    <meta property="og:url" content="https://www.emlakduragim.com/">
+    <meta property="og:image" content="https://www.emlakduragim.com/icon-512.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Emlak Durağı | Gayrimenkul Danışmanlığı">
+    <meta name="twitter:description"
+        content="Aliağa ve İzmir genelinde satılık ve kiralık daire, villa, arsa ilanları. Emlak Durağı ile hayalinizdeki evi güvenle bulun.">
+    <meta name="twitter:image" content="https://www.emlakduragim.com/icon-512.png">
     <link rel="stylesheet" href="style.css">
     <script src="components.js"></script>
 </head>
@@ -87,7 +102,7 @@
                 return `
                    <div class="card" data-tip="${ilan.tip}" onclick="ilanDetay(${ilan.id})" style="cursor:pointer;">
                         <div class="card-img-wrap">
-                            <img src="${anaResim}" alt="${escapeHtml(ilan.baslik)}">
+                            <img src="${anaResim}" alt="${escapeHtml(ilan.baslik)}" loading="lazy">
                             <span class="badge ${badgeClass}">${badgeYazi}</span>
                             <span class="tip-badge">${escapeHtml(ilan.emlak_tipi)}</span>
                         </div>

@@ -3,6 +3,11 @@
 
 <head>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#ffffff">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danışman Detay | Emlak Durağı</title>
@@ -436,7 +441,7 @@
 
     <header>
         <div class="logo">
-            <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+            <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
                 <img src="logo.png" alt="Emlak Durağı Logo" style="width:40px; height:40px; border-radius:50%;">
                 <div class="logo-text">
                     <span class="logo-main">EMLAK DURAĞI</span>
@@ -444,11 +449,11 @@
                 </div>
             </a>
         </div>
-        <nav><a href="admin.html">← Admin Paneli</a></nav>
+        <nav><a href="/admin">← Admin Paneli</a></nav>
     </header>
 
     <div class="detay-container">
-        <a href="admin.html" class="geri-link">← Admin Paneline Dön</a>
+        <a href="/admin" class="geri-link">← Admin Paneline Dön</a>
 
         <div class="Yonetim-Grid">
 
@@ -503,7 +508,7 @@
                 <div
                     style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
                     <h2 class="bolum-baslik" style="margin:0;">📋 İlanlar Yönetimi</h2>
-                    <a href="admin.html"
+                    <a href="/admin"
                         style="background:#f9e01a;color:#111;text-decoration:none;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                         ➕ Yeni İlan Ekle
                     </a>
@@ -552,13 +557,13 @@
         let tumIlanlar = [];
         let aktifFiltre = 'hepsi';
 
-        if (!danismanId) window.location.href = 'admin.html';
+        if (!danismanId) window.location.href = '/admin';
 
         // === DANIŞMAN BİLGİLERİ ===
         async function danismanYukle() {
             try {
                 const cevap = await fetch(`/api/danismanlar/${danismanId}`);
-                if (!cevap.ok) { window.location.href = 'admin.html'; return; }
+                if (!cevap.ok) { window.location.href = '/admin'; return; }
                 const d = await cevap.json();
 
                 const ilkHarf = (d.ad || '?').charAt(0).toUpperCase();
@@ -571,7 +576,7 @@
                 document.getElementById('duzenle-tel').value = d.telefon;
             } catch (hata) {
                 console.error('Danışman yüklenemedi:', hata);
-                window.location.href = 'admin.html';
+                window.location.href = '/admin';
             }
         }
 
@@ -687,7 +692,7 @@
                     </div>
                 </div>
                 <div class="btn-group">
-                    <a href="ilan-detay.html?id=${ilan.id}" target="_blank" class="btn-detay" title="Görüntüle">👁</a>
+                    <a href="/ilan-detay?id=${ilan.id}" target="_blank" class="btn-detay" title="Görüntüle">👁</a>
                     <button class="btn-duzenle" onclick="ilanDuzenleGit(${ilan.id})" title="Düzenle">✏️</button>
                     <button class="btn-sil" onclick="ilanSil(${ilan.id})" title="Sil">🗑</button>
                 </div>
@@ -701,7 +706,7 @@
         }
 
         function ilanDuzenleGit(ilanId) {
-            window.location.href = 'admin.html?duzenle=' + ilanId;
+            window.location.href = '/admin?duzenle=' + ilanId;
         }
 
         async function ilanSil(id) {

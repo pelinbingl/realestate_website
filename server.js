@@ -13,6 +13,11 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static('public', { extensions: ['html'] }));
 app.use(express.json());
 
+// /admin adresi de /admin.html ile aynı sayfayı göstersin
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // === ADMIN OTURUM YÖNETİMİ ===
 // Basit token tabanlı koruma: şifre sadece sunucuda kontrol edilir,
 // istemciye asla gönderilmez. Girişten sonra istemciye tek seferlik

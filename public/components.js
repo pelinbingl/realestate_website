@@ -1,12 +1,8 @@
 // === ORTAK HEADER ===
 function headerYukle() {
-  const mevcutSayfa = window.location.pathname.split('/').pop() || 'index.html';
-  // Favicon ekle
-  const favicon = document.createElement('link');
-  favicon.rel   = 'icon';
-  favicon.href  = '/logo.png';
-  favicon.type  = 'image/png';
-  document.head.appendChild(favicon); 
+  const mevcutSayfa = window.location.pathname;
+  // Favicon artık her sayfanın <head> kısmında statik olarak tanımlı
+  // (apple-touch-icon, manifest ve boyutlu favicon setiyle birlikte).
   const header = `
     <div class="topbar">
       <span>📞 0232 655 84 84 &nbsp;|&nbsp; 📞 0534 540 64 64</span>
@@ -16,7 +12,7 @@ function headerYukle() {
 
     <header>
       <div class="logo">
-        <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+        <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
           <img src="logo.png" alt="Emlak Durağı Logo" class="logo-img">
           <div class="logo-text">
             <span class="logo-main">EMLAK DURAĞI</span>
@@ -30,11 +26,11 @@ function headerYukle() {
         <span></span>
       </button>
       <nav id="ana-nav">
-        <a href="index.html"      class="${mevcutSayfa === 'index.html'      ? 'active' : ''}">Ana Sayfa</a>
-        <a href="kiralik.html"    class="${mevcutSayfa === 'kiralik.html'    ? 'active' : ''}">Kiralık</a>
-        <a href="satilik.html"    class="${mevcutSayfa === 'satilik.html'    ? 'active' : ''}">Satılık</a>
-        <a href="iletisim.html"   class="${mevcutSayfa === 'iletisim.html'   ? 'active' : ''}">İletişim</a>
-        <a href="hakkimizda.html" class="${mevcutSayfa === 'hakkimizda.html' ? 'active' : ''}">Hakkımızda</a>
+        <a href="/"      class="${mevcutSayfa === '/'      ? 'active' : ''}">Ana Sayfa</a>
+        <a href="/kiralik"    class="${mevcutSayfa === '/kiralik'    ? 'active' : ''}">Kiralık</a>
+        <a href="/satilik"    class="${mevcutSayfa === '/satilik'    ? 'active' : ''}">Satılık</a>
+        <a href="/iletisim"   class="${mevcutSayfa === '/iletisim'   ? 'active' : ''}">İletişim</a>
+        <a href="/hakkimizda" class="${mevcutSayfa === '/hakkimizda' ? 'active' : ''}">Hakkımızda</a>
       </nav>
     </header>
   `;
@@ -54,20 +50,20 @@ function footerYukle() {
         <div class="footer-col">
           <h3>Hızlı Linkler</h3>
           <ul>
-            <li><a href="index.html">Ana Sayfa</a></li>
-            <li><a href="kiralik.html">Kiralık İlanlar</a></li>
-            <li><a href="satilik.html">Satılık İlanlar</a></li>
-            <li><a href="iletisim.html">İletişim</a></li>
-            <li><a href="hakkimizda.html">Hakkımızda</a></li>
+            <li><a href="/">Ana Sayfa</a></li>
+            <li><a href="/kiralik">Kiralık İlanlar</a></li>
+            <li><a href="/satilik">Satılık İlanlar</a></li>
+            <li><a href="/iletisim">İletişim</a></li>
+            <li><a href="/hakkimizda">Hakkımızda</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <h3>Hizmetlerimiz</h3>
           <ul>
-            <li><a href="satilik.html">Konut Satışı</a></li>
-            <li><a href="kiralik.html">Konut Kirası</a></li>
-            <li><a href="satilik.html">Arsa Satışı</a></li>
-            <li><a href="hakkimizda.html">Hakkımızda</a></li>
+            <li><a href="/satilik">Konut Satışı</a></li>
+            <li><a href="/kiralik">Konut Kirası</a></li>
+            <li><a href="/satilik">Arsa Satışı</a></li>
+            <li><a href="/hakkimizda">Hakkımızda</a></li>
           </ul>
         </div>
         <div class="footer-col">

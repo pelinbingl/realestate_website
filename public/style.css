@@ -196,7 +196,7 @@ nav a.active {
 /* === İLANLAR BÖLÜMÜ === */
 .listings {
     padding: 60px 40px;
-    max-width: 1200px;
+    max-width: 1320px;
     margin: 0 auto;
 }
 
@@ -246,8 +246,8 @@ nav a.active {
 /* === KARTLAR === */
 .cards-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
 }
 
 .card {
@@ -269,7 +269,7 @@ nav a.active {
 
 .card-img-wrap img {
     width: 100%;
-    height: 200px;
+    height: 230px;
     object-fit: cover;
     display: block;
 }
@@ -305,11 +305,11 @@ nav a.active {
 }
 
 .card-info {
-    padding: 18px;
+    padding: 22px;
 }
 
 .card-info h3 {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     margin-bottom: 6px;
     color: #111;

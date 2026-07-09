@@ -3,11 +3,10 @@ require('dotenv').config({ override: true });
 const express = require('express');
 const multer  = require('multer');
 const path    = require('path');
-const fs      = require('fs');
 const crypto  = require('crypto');
 const helmet  = require('helmet');
 const rateLimit = require('express-rate-limit');
-const db      = require('./database');
+const { pool, hazir } = require('./database');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -80,11 +79,21 @@ app.post('/api/admin/login', loginLimiter, (req, res) => {
   res.json({ token });
 });
 
-// === RESİM YÜKLEME AYARLARI ===
-// Yalnızca gerçekten izin verilen resim türlerine izin verilir.
-// Hem uzantı hem de MIME tipi ayrı ayrı kontrol edilir ve BİRBİRİYLE
-// EŞLEŞMESİ zorunludur; bu da ".svg" veya ".html" gibi bir dosyayı
-// sahte "image/png" başlığıyla yükleyip depoya script sokmayı engeller.
+// === RESİM YÜKLEME AYARLARI (Supabase Storage) ===
+// Yerel diske değil, Supabase Storage'a yüklenir; böylece Render'da her
+// deploy'da diskin sıfırlanması fotoğrafları silmez.
+const { createClient } = require('@supabase/supabase-js');
+
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.warn('⚠️  SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY tanımlı değil — resim yükleme çalışmayacak!');
+}
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+const RESIM_BUCKET = 'ilan-resimleri';
+
 const IZINLI_TIPLER = {
   '.jpg':  'image/jpeg',
   '.jpeg': 'image/jpeg',
@@ -92,21 +101,8 @@ const IZINLI_TIPLER = {
   '.webp': 'image/webp'
 };
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = 'public/uploads';
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const benzersizAd = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const uzanti = path.extname(file.originalname).toLowerCase();
-    cb(null, benzersizAd + uzanti);
-  }
-});
-
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const uzanti = path.extname(file.originalname).toLowerCase();
@@ -133,75 +129,90 @@ app.get('/api/config', (req, res) => {
 // ilk baytlarına (magic bytes) bakarak doğrular. Uzantı/MIME sahteciliğine
 // (ör. .png gibi görünen ama içi <script> dolu bir SVG/HTML dosyası) karşı
 // son savunma katmanı.
-function gercekResimMi(dosyaYolu) {
-  const buf = Buffer.alloc(12);
-  const fd = fs.openSync(dosyaYolu, 'r');
-  fs.readSync(fd, buf, 0, 12, 0);
-  fs.closeSync(fd);
-  const hex = buf.toString('hex');
+function gercekResimMi(buffer) {
+  const hex = buffer.subarray(0, 12).toString('hex');
   const isJPEG = hex.startsWith('ffd8ff');
   const isPNG  = hex.startsWith('89504e470d0a1a0a');
-  const isWEBP = buf.slice(0, 4).toString('ascii') === 'RIFF' && buf.slice(8, 12).toString('ascii') === 'WEBP';
+  const isWEBP = buffer.subarray(0, 4).toString('ascii') === 'RIFF' && buffer.subarray(8, 12).toString('ascii') === 'WEBP';
   return isJPEG || isPNG || isWEBP;
 }
 
-app.post('/api/resim-yukle', adminYetkiKontrol, upload.array('resimler', 35), (req, res) => {
+app.post('/api/resim-yukle', adminYetkiKontrol, upload.array('resimler', 35), async (req, res) => {
   if (!req.files || req.files.length === 0)
     return res.status(400).json({ hata: 'Dosya yüklenmedi' });
 
   for (const f of req.files) {
-    if (!gercekResimMi(f.path)) {
-      // Sahte/geçersiz içerikli dosyaları sil ve reddet
-      req.files.forEach(x => fs.existsSync(x.path) && fs.unlinkSync(x.path));
+    if (!gercekResimMi(f.buffer)) {
       return res.status(400).json({ hata: 'Geçersiz resim dosyası tespit edildi' });
     }
   }
 
-  const urls = req.files.map(f => '/uploads/' + f.filename);
-  res.json({ urls });
+  try {
+    const urls = [];
+    for (const f of req.files) {
+      const uzanti = path.extname(f.originalname).toLowerCase();
+      const dosyaAdi = `${Date.now()}-${Math.round(Math.random() * 1e9)}${uzanti}`;
+
+      const { error } = await supabase.storage
+        .from(RESIM_BUCKET)
+        .upload(dosyaAdi, f.buffer, { contentType: f.mimetype, upsert: false });
+
+      if (error) throw error;
+
+      const { data } = supabase.storage.from(RESIM_BUCKET).getPublicUrl(dosyaAdi);
+      urls.push(data.publicUrl);
+    }
+    res.json({ urls });
+  } catch (hata) {
+    console.error('Supabase Storage yükleme hatası:', hata);
+    res.status(500).json({ hata: 'Resim yüklenirken bir sorun oluştu' });
+  }
 });
 // === TÜM İLANLARI GETİR ===
-app.get('/api/ilanlar', (req, res) => {
-  const { tip } = req.query;
-  let ilanlar;
-  if (tip && tip !== 'tumu') {
-    ilanlar = db.prepare(`
+app.get('/api/ilanlar', async (req, res) => {
+  try {
+    const { tip } = req.query;
+    const temelSorgu = `
       SELECT i.*,
         COALESCE(d.ad, 'Oktay Bingöl') as danisman_ad,
         COALESCE(d.telefon, '0534 540 64 64') as danisman_tel,
         d.foto as danisman_foto
       FROM ilanlar i LEFT JOIN danismanlar d ON i.danisman_id = d.id
-      WHERE i.tip = ? ORDER BY i.id DESC
-    `).all(tip);
-  } else {
-    ilanlar = db.prepare(`
-      SELECT i.*,
-        COALESCE(d.ad, 'Oktay Bingöl') as danisman_ad,
-        COALESCE(d.telefon, '0534 540 64 64') as danisman_tel,
-        d.foto as danisman_foto
-      FROM ilanlar i LEFT JOIN danismanlar d ON i.danisman_id = d.id
-      ORDER BY i.id DESC
-    `).all();
+    `;
+    let sonuc;
+    if (tip && tip !== 'tumu') {
+      sonuc = await pool.query(temelSorgu + ' WHERE i.tip = $1 ORDER BY i.id DESC', [tip]);
+    } else {
+      sonuc = await pool.query(temelSorgu + ' ORDER BY i.id DESC');
+    }
+    res.json(sonuc.rows);
+  } catch (hata) {
+    console.error(hata);
+    res.status(500).json({ hata: 'İlanlar getirilemedi' });
   }
-  res.json(ilanlar);
 });
 
 // === TEK İLAN GETİR ===
-app.get('/api/ilanlar/:id', (req, res) => {
-  const ilan = db.prepare(`
-    SELECT i.*,
-      COALESCE(d.ad, 'Oktay Bingöl') as danisman_ad,
-      COALESCE(d.telefon, '0534 540 64 64') as danisman_tel,
-      d.foto as danisman_foto
-    FROM ilanlar i LEFT JOIN danismanlar d ON i.danisman_id = d.id
-    WHERE i.id = ?
-  `).get(req.params.id);
-  if (!ilan) return res.status(404).json({ hata: 'İlan bulunamadı' });
-  res.json(ilan);
+app.get('/api/ilanlar/:id', async (req, res) => {
+  try {
+    const sonuc = await pool.query(`
+      SELECT i.*,
+        COALESCE(d.ad, 'Oktay Bingöl') as danisman_ad,
+        COALESCE(d.telefon, '0534 540 64 64') as danisman_tel,
+        d.foto as danisman_foto
+      FROM ilanlar i LEFT JOIN danismanlar d ON i.danisman_id = d.id
+      WHERE i.id = $1
+    `, [req.params.id]);
+    if (sonuc.rows.length === 0) return res.status(404).json({ hata: 'İlan bulunamadı' });
+    res.json(sonuc.rows[0]);
+  } catch (hata) {
+    console.error(hata);
+    res.status(500).json({ hata: 'İlan getirilemedi' });
+  }
 });
 
 // === YENİ İLAN EKLE ===
-app.post('/api/ilanlar', adminYetkiKontrol, (req, res) => {
+app.post('/api/ilanlar', adminYetkiKontrol, async (req, res) => {
   const {
     baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, resim, resimler, aciklama,
     kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
@@ -214,30 +225,40 @@ app.post('/api/ilanlar', adminYetkiKontrol, (req, res) => {
   const resimlerStr = Array.isArray(resimler) ? resimler.join(',') : (resimler || resim || '');
   const anaResim    = Array.isArray(resimler) && resimler.length > 0 ? resimler[0] : (resim || '');
 
-  const sonuc = db.prepare(`
-    INSERT INTO ilanlar
-    (baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, resim, resimler, aciklama,
-     kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
-     imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, anaResim, resimlerStr, aciklama,
-    kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
-    imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id || null
-  );
-
-  res.status(201).json({ mesaj: 'İlan eklendi!', id: sonuc.lastInsertRowid });
+  try {
+    const sonuc = await pool.query(`
+      INSERT INTO ilanlar
+      (baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, resim, resimler, aciklama,
+       kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
+       imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)
+      RETURNING id
+    `, [
+      baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, anaResim, resimlerStr, aciklama,
+      kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
+      imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id || null
+    ]);
+    res.status(201).json({ mesaj: 'İlan eklendi!', id: sonuc.rows[0].id });
+  } catch (hata) {
+    console.error(hata);
+    res.status(500).json({ hata: 'İlan eklenemedi' });
+  }
 });
 
 // === İLAN SİL ===
-app.delete('/api/ilanlar/:id', adminYetkiKontrol, (req, res) => {
-  const sonuc = db.prepare('DELETE FROM ilanlar WHERE id = ?').run(req.params.id);
-  if (sonuc.changes === 0) return res.status(404).json({ hata: 'İlan bulunamadı' });
-  res.json({ mesaj: 'İlan silindi' });
+app.delete('/api/ilanlar/:id', adminYetkiKontrol, async (req, res) => {
+  try {
+    const sonuc = await pool.query('DELETE FROM ilanlar WHERE id = $1', [req.params.id]);
+    if (sonuc.rowCount === 0) return res.status(404).json({ hata: 'İlan bulunamadı' });
+    res.json({ mesaj: 'İlan silindi' });
+  } catch (hata) {
+    console.error(hata);
+    res.status(500).json({ hata: 'İlan silinemedi' });
+  }
 });
 
 // === İLAN GÜNCELLE ===
-app.put('/api/ilanlar/:id', adminYetkiKontrol, (req, res) => {
+app.put('/api/ilanlar/:id', adminYetkiKontrol, async (req, res) => {
   const {
     baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, resim, resimler, aciklama,
     kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
@@ -247,86 +268,128 @@ app.put('/api/ilanlar/:id', adminYetkiKontrol, (req, res) => {
   const resimlerStr = Array.isArray(resimler) ? resimler.join(',') : (resimler || '');
   const anaResim    = Array.isArray(resimler) && resimler.length > 0 ? resimler[0] : (resim || '');
 
-  const sonuc = db.prepare(`
-    UPDATE ilanlar SET
-      baslik=?, konum=?, fiyat=?, tip=?, emlak_tipi=?, oda=?, metrekare=?,
-      resim=?, resimler=?, aciklama=?, kat=?, bina_yasi=?, isitma=?, ozellikler=?,
-      banyo=?, teras=?, balkon=?, esyali=?, site=?,
-      imar=?, ada_parsel=?, cephe=?, kredi_uygunluk=?, takas=?, danisman_id=?
-    WHERE id=?
-  `).run(
-    baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare,
-    anaResim, resimlerStr, aciklama, kat, bina_yasi, isitma, ozellikler,
-    banyo, teras, balkon, esyali, site,
-    imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id || null,
-    req.params.id
-  );
-
-  if (sonuc.changes === 0) return res.status(404).json({ hata: 'İlan bulunamadı' });
-  res.json({ mesaj: 'İlan güncellendi!' });
+  try {
+    const sonuc = await pool.query(`
+      UPDATE ilanlar SET
+        baslik=$1, konum=$2, fiyat=$3, tip=$4, emlak_tipi=$5, oda=$6, metrekare=$7,
+        resim=$8, resimler=$9, aciklama=$10, kat=$11, bina_yasi=$12, isitma=$13, ozellikler=$14,
+        banyo=$15, teras=$16, balkon=$17, esyali=$18, site=$19,
+        imar=$20, ada_parsel=$21, cephe=$22, kredi_uygunluk=$23, takas=$24, danisman_id=$25
+      WHERE id=$26
+    `, [
+      baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare,
+      anaResim, resimlerStr, aciklama, kat, bina_yasi, isitma, ozellikler,
+      banyo, teras, balkon, esyali, site,
+      imar, ada_parsel, cephe, kredi_uygunluk, takas, danisman_id || null,
+      req.params.id
+    ]);
+    if (sonuc.rowCount === 0) return res.status(404).json({ hata: 'İlan bulunamadı' });
+    res.json({ mesaj: 'İlan güncellendi!' });
+  } catch (hata) {
+    console.error(hata);
+    res.status(500).json({ hata: 'İlan güncellenemedi' });
+  }
 });
 
 // === TÜM DANIŞMANLARI GETİR ===
-app.get('/api/danismanlar', (req, res) => {
-  const danismanlar = db.prepare('SELECT * FROM danismanlar ORDER BY id ASC').all();
-  res.json(danismanlar);
+app.get('/api/danismanlar', async (req, res) => {
+  try {
+    const sonuc = await pool.query('SELECT * FROM danismanlar ORDER BY id ASC');
+    res.json(sonuc.rows);
+  } catch (hata) {
+    console.error(hata);
+    res.status(500).json({ hata: 'Danışmanlar getirilemedi' });
+  }
 });
 
-// === TEK DANIŞMAN GETİR ===  ← EKSİK OLAN BUYDU
-app.get('/api/danismanlar/:id', (req, res) => {
-  const danisman = db.prepare('SELECT * FROM danismanlar WHERE id = ?').get(req.params.id);
-  if (!danisman) return res.status(404).json({ hata: 'Danışman bulunamadı' });
-  res.json(danisman);
+// === TEK DANIŞMAN GETİR ===
+app.get('/api/danismanlar/:id', async (req, res) => {
+  try {
+    const sonuc = await pool.query('SELECT * FROM danismanlar WHERE id = $1', [req.params.id]);
+    if (sonuc.rows.length === 0) return res.status(404).json({ hata: 'Danışman bulunamadı' });
+    res.json(sonuc.rows[0]);
+  } catch (hata) {
+    console.error(hata);
+    res.status(500).json({ hata: 'Danışman getirilemedi' });
+  }
 });
 
 // === DANIŞMANA AİT İLANLAR ===
-app.get('/api/danismanlar/:id/ilanlar', (req, res) => {
-  const id = req.params.id;
-  const danisman = db.prepare('SELECT * FROM danismanlar WHERE id = ?').get(id);
+app.get('/api/danismanlar/:id/ilanlar', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const danismanSonuc = await pool.query('SELECT * FROM danismanlar WHERE id = $1', [id]);
+    const danisman = danismanSonuc.rows[0];
 
-  let ilanlar;
-  if (danisman && danisman.ad === 'Oktay Bingöl') {
-    // Oktay Bingöl varsayılan danışman: danışmansız (boş) ilanlar da onun sayımına dahil
-    ilanlar = db.prepare(`
-      SELECT i.*, COALESCE(d.ad, 'Oktay Bingöl') as danisman_ad
-      FROM ilanlar i
-      LEFT JOIN danismanlar d ON i.danisman_id = d.id
-      WHERE i.danisman_id = ? OR i.danisman_id IS NULL
-      ORDER BY i.id DESC
-    `).all(id);
-  } else {
-    ilanlar = db.prepare(`
-      SELECT i.*, d.ad as danisman_ad
-      FROM ilanlar i
-      LEFT JOIN danismanlar d ON i.danisman_id = d.id
-      WHERE i.danisman_id = ?
-      ORDER BY i.id DESC
-    `).all(id);
+    let sonuc;
+    if (danisman && danisman.ad === 'Oktay Bingöl') {
+      // Oktay Bingöl varsayılan danışman: danışmansız (boş) ilanlar da onun sayımına dahil
+      sonuc = await pool.query(`
+        SELECT i.*, COALESCE(d.ad, 'Oktay Bingöl') as danisman_ad
+        FROM ilanlar i
+        LEFT JOIN danismanlar d ON i.danisman_id = d.id
+        WHERE i.danisman_id = $1 OR i.danisman_id IS NULL
+        ORDER BY i.id DESC
+      `, [id]);
+    } else {
+      sonuc = await pool.query(`
+        SELECT i.*, d.ad as danisman_ad
+        FROM ilanlar i
+        LEFT JOIN danismanlar d ON i.danisman_id = d.id
+        WHERE i.danisman_id = $1
+        ORDER BY i.id DESC
+      `, [id]);
+    }
+    res.json(sonuc.rows);
+  } catch (hata) {
+    console.error(hata);
+    res.status(500).json({ hata: 'İlanlar getirilemedi' });
   }
-  res.json(ilanlar);
 });
+
 // === DANIŞMAN EKLE ===
-app.post('/api/danismanlar', adminYetkiKontrol, (req, res) => {
+app.post('/api/danismanlar', adminYetkiKontrol, async (req, res) => {
   const { ad, telefon, foto } = req.body;
   if (!ad || !telefon) return res.status(400).json({ hata: 'Ad ve telefon zorunlu!' });
-  const sonuc = db.prepare('INSERT INTO danismanlar (ad, telefon, foto) VALUES (?, ?, ?)').run(ad, telefon, foto || '');
-  res.status(201).json({ mesaj: 'Danışman eklendi!', id: sonuc.lastInsertRowid });
+  try {
+    const sonuc = await pool.query(
+      'INSERT INTO danismanlar (ad, telefon, foto) VALUES ($1, $2, $3) RETURNING id',
+      [ad, telefon, foto || '']
+    );
+    res.status(201).json({ mesaj: 'Danışman eklendi!', id: sonuc.rows[0].id });
+  } catch (hata) {
+    console.error(hata);
+    res.status(500).json({ hata: 'Danışman eklenemedi' });
+  }
 });
 
 // === DANIŞMAN SİL ===
-app.delete('/api/danismanlar/:id', adminYetkiKontrol, (req, res) => {
-  const sonuc = db.prepare('DELETE FROM danismanlar WHERE id = ?').run(req.params.id);
-  if (sonuc.changes === 0) return res.status(404).json({ hata: 'Danışman bulunamadı' });
-  res.json({ mesaj: 'Danışman silindi' });
+app.delete('/api/danismanlar/:id', adminYetkiKontrol, async (req, res) => {
+  try {
+    const sonuc = await pool.query('DELETE FROM danismanlar WHERE id = $1', [req.params.id]);
+    if (sonuc.rowCount === 0) return res.status(404).json({ hata: 'Danışman bulunamadı' });
+    res.json({ mesaj: 'Danışman silindi' });
+  } catch (hata) {
+    console.error(hata);
+    res.status(500).json({ hata: 'Danışman silinemedi' });
+  }
 });
 
 // === DANIŞMAN GÜNCELLE ===
-app.put('/api/danismanlar/:id', adminYetkiKontrol, (req, res) => {
+app.put('/api/danismanlar/:id', adminYetkiKontrol, async (req, res) => {
   const { ad, telefon } = req.body;
   if (!ad || !telefon) return res.status(400).json({ hata: 'Ad ve telefon zorunlu!' });
-  const sonuc = db.prepare('UPDATE danismanlar SET ad=?, telefon=? WHERE id=?').run(ad, telefon, req.params.id);
-  if (sonuc.changes === 0) return res.status(404).json({ hata: 'Danışman bulunamadı' });
-  res.json({ mesaj: 'Danışman güncellendi!' });
+  try {
+    const sonuc = await pool.query(
+      'UPDATE danismanlar SET ad=$1, telefon=$2 WHERE id=$3',
+      [ad, telefon, req.params.id]
+    );
+    if (sonuc.rowCount === 0) return res.status(404).json({ hata: 'Danışman bulunamadı' });
+    res.json({ mesaj: 'Danışman güncellendi!' });
+  } catch (hata) {
+    console.error(hata);
+    res.status(500).json({ hata: 'Danışman güncellenemedi' });
+  }
 });
 
 // === NODEMAILER KURULUM ===
@@ -371,6 +434,8 @@ app.post('/api/iletisim', iletisimLimiter, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Sunucu çalışıyor: http://localhost:${PORT}`);
+hazir.then(() => {
+  app.listen(PORT, () => {
+    console.log(`✅ Sunucu çalışıyor: http://localhost:${PORT}`);
+  });
 });

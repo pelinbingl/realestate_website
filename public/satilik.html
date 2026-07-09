@@ -147,21 +147,21 @@
             grid.innerHTML = ilanlar.map(ilan => {
                 const fiyat = `₺${ilan.fiyat.toLocaleString('tr-TR')}`;
                 const arsaMi = arsaTipleri.includes(ilan.emlak_tipi);
-                const resim = ilan.resim || 'https://via.placeholder.com/400x250?text=Resim+Yok';
+                const resim = escapeHtml(ilan.resim || 'https://via.placeholder.com/400x250?text=Resim+Yok');
 
                 const detaylar = arsaMi
                     ? `<span>📐 ${ilan.metrekare} m²</span>`
-                    : `${ilan.oda ? `<span>⊞ ${ilan.oda}</span>` : ''}<span>⊡ ${ilan.metrekare} m²</span>`;
+                    : `${ilan.oda ? `<span>⊞ ${escapeHtml(ilan.oda)}</span>` : ''}<span>⊡ ${ilan.metrekare} m²</span>`;
 
                 return `
                     <div class="liste-kart" onclick="window.location.href='/ilan-detay?id=${ilan.id}'">
                         <div class="liste-kart-resim">
-                            <img src="${resim}" alt="${ilan.baslik}">
-                            <span class="liste-tip-badge satilik-badge-renk">${ilan.emlak_tipi}</span>
+                            <img src="${resim}" alt="${escapeHtml(ilan.baslik)}">
+                            <span class="liste-tip-badge satilik-badge-renk">${escapeHtml(ilan.emlak_tipi)}</span>
                         </div>
                         <div class="liste-kart-bilgi">
-                            <h3>${ilan.baslik}</h3>
-                            <p class="liste-konum">📍 ${ilan.konum}</p>
+                            <h3>${escapeHtml(ilan.baslik)}</h3>
+                            <p class="liste-konum">📍 ${escapeHtml(ilan.konum)}</p>
                             <div class="liste-detaylar">${detaylar}</div>
                             <div class="liste-fiyat">${fiyat}</div>
                         </div>

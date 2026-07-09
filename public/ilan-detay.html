@@ -157,17 +157,20 @@
                 ? ilan.resimler.split(',').filter(r => r.trim())
                 : (ilan.resim ? [ilan.resim] : []);
 
-            const anaResim = tumResimler[0] || 'https://via.placeholder.com/800x500?text=Resim+Yok';
+            const anaResim = escapeHtml(tumResimler[0] || 'https://via.placeholder.com/800x500?text=Resim+Yok');
             document.getElementById('detay-resim-buyuk').src = anaResim;
 
             const thumbContainer = document.getElementById('galeri-thumbnails');
             if (tumResimler.length > 1) {
                 thumbContainer.innerHTML = tumResimler.map((url, i) => `
-                    <img src="${url.trim()}"
+                    <img src="${escapeHtml(url.trim())}"
                          class="${i === 0 ? 'aktif-thumb' : ''}"
-                         onclick="resimDegistir(this, '${url.trim()}')"
+                         data-url="${escapeHtml(url.trim())}"
                          alt="Resim ${i + 1}">
                 `).join('');
+                thumbContainer.querySelectorAll('img').forEach(img => {
+                    img.addEventListener('click', () => resimDegistir(img, img.dataset.url));
+                });
             } else {
                 thumbContainer.style.display = 'none';
             }
@@ -217,11 +220,11 @@
             document.getElementById('iletisim-bilgi').innerHTML = `
                 <div class="iletisim-satir">
                     <span>👤</span>
-                    <p>${danismanAd}</p>
+                    <p>${escapeHtml(danismanAd)}</p>
                 </div>
                 <div class="iletisim-satir">
                     <span>📞</span>
-                    <p>${danismanTel}</p>
+                    <p>${escapeHtml(danismanTel)}</p>
                 </div>
             `;
 
@@ -268,7 +271,7 @@
             document.getElementById('bilgi-tablo').innerHTML = bilgiler.map(b => `
                 <div class="bilgi-satir">
                     <span class="bilgi-satir-baslik">${b.baslik}</span>
-                    <span class="bilgi-satir-deger">${b.deger}</span>
+                    <span class="bilgi-satir-deger">${escapeHtml(b.deger)}</span>
                 </div>
             `).join('');
 
@@ -310,20 +313,20 @@
                     const fiyat = i.tip === 'kiralik'
                         ? `₺${i.fiyat.toLocaleString('tr-TR')} / ay`
                         : `₺${i.fiyat.toLocaleString('tr-TR')}`;
-                    const odaBilgi = i.oda ? `<span>🛏 ${i.oda}</span>` : '';
-                    const resim = i.resim || 'https://via.placeholder.com/400x250?text=Resim+Yok';
+                    const odaBilgi = i.oda ? `<span>🛏 ${escapeHtml(i.oda)}</span>` : '';
+                    const resim = escapeHtml(i.resim || 'https://via.placeholder.com/400x250?text=Resim+Yok');
                     return `
                         <div class="card" onclick="window.location.href='/ilan-detay?id=${i.id}'" style="cursor:pointer;">
                             <div class="card-img-wrap">
-                                <img src="${resim}" alt="${i.baslik}">
+                                <img src="${resim}" alt="${escapeHtml(i.baslik)}">
                                 <span class="badge ${i.tip === 'kiralik' ? 'kiralik-badge' : 'satilik-badge'}">
                                     ${i.tip === 'kiralik' ? 'Kiralık' : 'Satılık'}
                                 </span>
-                                <span class="tip-badge">${i.emlak_tipi}</span>
+                                <span class="tip-badge">${escapeHtml(i.emlak_tipi)}</span>
                             </div>
                             <div class="card-info">
-                                <h3>${i.baslik}</h3>
-                                <p class="location">📍 ${i.konum}</p>
+                                <h3>${escapeHtml(i.baslik)}</h3>
+                                <p class="location">📍 ${escapeHtml(i.konum)}</p>
                                 <div class="card-details">
                                     ${odaBilgi}
                                     <span>📐 ${i.metrekare} m²</span>

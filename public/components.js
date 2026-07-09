@@ -1,3 +1,12 @@
+// === GÜVENLİK: HTML kaçışlama ===
+// İlan/danışman gibi kullanıcı (admin) girdisi içeren verileri sayfaya
+// basmadan önce bunu kullan; stored XSS'i engeller.
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
 // === ORTAK HEADER ===
 function headerYukle() {
   const mevcutSayfa = window.location.pathname;

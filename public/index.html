@@ -81,19 +81,19 @@
 
                 const badgeClass = ilan.tip === 'kiralik' ? 'kiralik-badge' : 'satilik-badge';
                 const badgeYazi = ilan.tip === 'kiralik' ? 'Kiralık' : 'Satılık';
-                const odaBilgi = ilan.oda ? `<span>🛏 ${ilan.oda}</span>` : '';
-                const anaResim = ilan.resim || 'https://via.placeholder.com/400x250?text=Resim+Yok';
+                const odaBilgi = ilan.oda ? `<span>🛏 ${escapeHtml(ilan.oda)}</span>` : '';
+                const anaResim = escapeHtml(ilan.resim || 'https://via.placeholder.com/400x250?text=Resim+Yok');
 
                 return `
                    <div class="card" data-tip="${ilan.tip}" onclick="ilanDetay(${ilan.id})" style="cursor:pointer;">
                         <div class="card-img-wrap">
-                            <img src="${anaResim}" alt="${ilan.baslik}">
+                            <img src="${anaResim}" alt="${escapeHtml(ilan.baslik)}">
                             <span class="badge ${badgeClass}">${badgeYazi}</span>
-                            <span class="tip-badge">${ilan.emlak_tipi}</span>
+                            <span class="tip-badge">${escapeHtml(ilan.emlak_tipi)}</span>
                         </div>
                         <div class="card-info">
-                            <h3>${ilan.baslik}</h3>
-                            <p class="location">📍 ${ilan.konum}</p>
+                            <h3>${escapeHtml(ilan.baslik)}</h3>
+                            <p class="location">📍 ${escapeHtml(ilan.konum)}</p>
                             <div class="card-details">
                                 ${odaBilgi}
                                 <span>📐 ${ilan.metrekare} m²</span>

@@ -5,10 +5,20 @@ const multer  = require('multer');
 const path    = require('path');
 const fs      = require('fs');
 const crypto  = require('crypto');
+const helmet  = require('helmet');
+const rateLimit = require('express-rate-limit');
 const db      = require('./database');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
+
+app.set('trust proxy', 1); // Render bir proxy arkasında çalışır, gerçek IP için gerekli
+
+// Temel güvenlik header'ları (XSS/clickjacking/MIME-sniffing koruması)
+app.use(helmet({
+  contentSecurityPolicy: false // Google Maps ve dışarıdan gelen script/resimleri kırmamak için kapalı;
+                                // istenirse ileride site'a özel bir CSP tanımlanabilir
+}));
 
 app.use(express.static('public', { extensions: ['html'] }));
 app.use(express.json());
@@ -18,15 +28,39 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+// Admin girişine karşı brute-force koruması: 10 dakikada en fazla 5 deneme
+const loginLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  message: { hata: 'Çok fazla deneme yapıldı. Lütfen 10 dakika sonra tekrar deneyin.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// İletişim formu spam koruması: 1 saatte en fazla 10 mesaj
+const iletisimLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  message: { hata: 'Çok fazla mesaj gönderildi. Lütfen daha sonra tekrar deneyin.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
 // === ADMIN OTURUM YÖNETİMİ ===
-// Basit token tabanlı koruma: şifre sadece sunucuda kontrol edilir,
-// istemciye asla gönderilmez. Girişten sonra istemciye tek seferlik
-// rastgele bir token verilir; korumalı işlemler bu token'ı ister.
-const validTokens = new Set();
+// Token tabanlı koruma: şifre sadece sunucuda kontrol edilir, istemciye
+// asla gönderilmez. Token'ların 4 saatlik bir geçerlilik süresi vardır;
+// süresi dolan token otomatik geçersiz sayılır.
+const validTokens = new Map(); // token -> son geçerlilik zamanı (ms)
+const TOKEN_OMRU = 4 * 60 * 60 * 1000; // 4 saat
 
 function adminYetkiKontrol(req, res, next) {
   const token = req.headers['x-admin-token'];
-  if (token && validTokens.has(token)) return next();
+  const suresi = token && validTokens.get(token);
+  if (suresi && suresi > Date.now()) {
+    validTokens.set(token, Date.now() + TOKEN_OMRU); // aktif kullanımda süreyi yenile
+    return next();
+  }
+  if (token) validTokens.delete(token); // süresi dolmuşsa temizle
   return res.status(401).json({ hata: 'Yetkisiz erişim: admin girişi gerekli' });
 }
 
@@ -36,17 +70,28 @@ function escapeHtml(str) {
   }[c]));
 }
 
-app.post('/api/admin/login', (req, res) => {
+app.post('/api/admin/login', loginLimiter, (req, res) => {
   const { sifre } = req.body;
   if (!sifre || sifre !== process.env.ADMIN_SIFRE) {
     return res.status(401).json({ hata: 'Hatalı şifre' });
   }
   const token = crypto.randomBytes(32).toString('hex');
-  validTokens.add(token);
+  validTokens.set(token, Date.now() + TOKEN_OMRU);
   res.json({ token });
 });
 
 // === RESİM YÜKLEME AYARLARI ===
+// Yalnızca gerçekten izin verilen resim türlerine izin verilir.
+// Hem uzantı hem de MIME tipi ayrı ayrı kontrol edilir ve BİRBİRİYLE
+// EŞLEŞMESİ zorunludur; bu da ".svg" veya ".html" gibi bir dosyayı
+// sahte "image/png" başlığıyla yükleyip depoya script sokmayı engeller.
+const IZINLI_TIPLER = {
+  '.jpg':  'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png':  'image/png',
+  '.webp': 'image/webp'
+};
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = 'public/uploads';
@@ -55,7 +100,8 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const benzersizAd = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, benzersizAd + path.extname(file.originalname));
+    const uzanti = path.extname(file.originalname).toLowerCase();
+    cb(null, benzersizAd + uzanti);
   }
 });
 
@@ -63,8 +109,13 @@ const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const gecerli = /jpeg|jpg|png|webp/.test(file.mimetype);
-    gecerli ? cb(null, true) : cb(new Error('Sadece resim dosyaları yüklenebilir!'));
+    const uzanti = path.extname(file.originalname).toLowerCase();
+    const beklenenMime = IZINLI_TIPLER[uzanti];
+    if (beklenenMime && beklenenMime === file.mimetype) {
+      cb(null, true);
+    } else {
+      cb(new Error('Sadece jpg, jpeg, png veya webp resim dosyaları yüklenebilir!'));
+    }
   }
 });
 
@@ -78,9 +129,34 @@ app.get('/api/config', (req, res) => {
 });
 
 // === RESİM YÜKLE ===
+// Dosyanın gerçekten beyan edilen türde bir resim olup olmadığını,
+// ilk baytlarına (magic bytes) bakarak doğrular. Uzantı/MIME sahteciliğine
+// (ör. .png gibi görünen ama içi <script> dolu bir SVG/HTML dosyası) karşı
+// son savunma katmanı.
+function gercekResimMi(dosyaYolu) {
+  const buf = Buffer.alloc(12);
+  const fd = fs.openSync(dosyaYolu, 'r');
+  fs.readSync(fd, buf, 0, 12, 0);
+  fs.closeSync(fd);
+  const hex = buf.toString('hex');
+  const isJPEG = hex.startsWith('ffd8ff');
+  const isPNG  = hex.startsWith('89504e470d0a1a0a');
+  const isWEBP = buf.slice(0, 4).toString('ascii') === 'RIFF' && buf.slice(8, 12).toString('ascii') === 'WEBP';
+  return isJPEG || isPNG || isWEBP;
+}
+
 app.post('/api/resim-yukle', adminYetkiKontrol, upload.array('resimler', 35), (req, res) => {
   if (!req.files || req.files.length === 0)
     return res.status(400).json({ hata: 'Dosya yüklenmedi' });
+
+  for (const f of req.files) {
+    if (!gercekResimMi(f.path)) {
+      // Sahte/geçersiz içerikli dosyaları sil ve reddet
+      req.files.forEach(x => fs.existsSync(x.path) && fs.unlinkSync(x.path));
+      return res.status(400).json({ hata: 'Geçersiz resim dosyası tespit edildi' });
+    }
+  }
+
   const urls = req.files.map(f => '/uploads/' + f.filename);
   res.json({ urls });
 });
@@ -265,7 +341,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // === İLETİŞİM FORMU MAİL GÖNDER ===
-app.post('/api/iletisim', async (req, res) => {
+app.post('/api/iletisim', iletisimLimiter, async (req, res) => {
   const { ad_soyad, telefon, email, konu, mesaj } = req.body;
 
   if (!ad_soyad || !telefon || !email || !konu || !mesaj) {

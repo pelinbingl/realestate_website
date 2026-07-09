@@ -530,6 +530,13 @@
     </div>
 
     <script>
+        // === GÜVENLİK: HTML kaçışlama (stored XSS koruması) ===
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
         // === ŞİFRE KORUMA (sunucu tarafında doğrulanır) ===
         // Tüm fetch çağrılarına otomatik olarak admin token'ı ekler.
         const _orijinalFetch = window.fetch;
@@ -689,17 +696,17 @@
             container.innerHTML = ilanlar.map(ilan => `
             <div class="detay-ilan-satir" id="ilan-satir-${ilan.id}">
                 <div class="detay-ilan-sol">
-                    <img src="${ilan.resim || ''}" alt="" onerror="this.style.display='none'" style="${ilan.resim ? '' : 'display:none'}">
+                    <img src="${escapeHtml(ilan.resim || '')}" alt="" onerror="this.style.display='none'" style="${ilan.resim ? '' : 'display:none'}">
                     ${!ilan.resim ? `<div style="width:100px;height:75px;background:#f0f0f0;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🏠</div>` : ''}
                     <div class="detay-ilan-bilgi">
-                        <strong title="${ilan.baslik}">${ilan.baslik}</strong>
-                        <span>📍 ${ilan.konum}</span>
+                        <strong title="${escapeHtml(ilan.baslik)}">${escapeHtml(ilan.baslik)}</strong>
+                        <span>📍 ${escapeHtml(ilan.konum)}</span>
                         <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;">
                             <span class="badge ${ilan.tip === 'kiralik' ? 'kiralik-badge' : 'satilik-badge'}">
                                 ${ilan.tip === 'kiralik' ? 'Kiralık' : 'Satılık'}
                             </span>
                             <span style="background:#f1f5f9;color:#475569;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600;">
-                                ${ilan.emlak_tipi}
+                                ${escapeHtml(ilan.emlak_tipi)}
                             </span>
                             ${ilan.metrekare ? `<span style="background:#f1f5f9;color:#475569;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600;">${ilan.metrekare} m²</span>` : ''}
                         </div>

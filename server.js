@@ -4,6 +4,7 @@ const express = require('express');
 const multer  = require('multer');
 const path    = require('path');
 const fs      = require('fs');
+const crypto  = require('crypto');
 const db      = require('./database');
 
 const app  = express();
@@ -11,6 +12,34 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static('public', { extensions: ['html'] }));
 app.use(express.json());
+
+// === ADMIN OTURUM YÖNETİMİ ===
+// Basit token tabanlı koruma: şifre sadece sunucuda kontrol edilir,
+// istemciye asla gönderilmez. Girişten sonra istemciye tek seferlik
+// rastgele bir token verilir; korumalı işlemler bu token'ı ister.
+const validTokens = new Set();
+
+function adminYetkiKontrol(req, res, next) {
+  const token = req.headers['x-admin-token'];
+  if (token && validTokens.has(token)) return next();
+  return res.status(401).json({ hata: 'Yetkisiz erişim: admin girişi gerekli' });
+}
+
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+app.post('/api/admin/login', (req, res) => {
+  const { sifre } = req.body;
+  if (!sifre || sifre !== process.env.ADMIN_SIFRE) {
+    return res.status(401).json({ hata: 'Hatalı şifre' });
+  }
+  const token = crypto.randomBytes(32).toString('hex');
+  validTokens.add(token);
+  res.json({ token });
+});
 
 // === RESİM YÜKLEME AYARLARI ===
 const storage = multer.diskStorage({
@@ -37,13 +66,14 @@ const upload = multer({
 // === CONFIG ===
 app.get('/api/config', (req, res) => {
   res.json({
-    googleMapsKey: process.env.GOOGLE_MAPS_API_KEY,
-    adminSifre:    process.env.ADMIN_SIFRE
+    googleMapsKey: process.env.GOOGLE_MAPS_API_KEY
+    // Not: admin şifresi artık buradan asla gönderilmiyor.
+    // Doğrulama /api/admin/login üzerinden sunucu tarafında yapılıyor.
   });
 });
 
 // === RESİM YÜKLE ===
-app.post('/api/resim-yukle', upload.array('resimler', 35), (req, res) => {
+app.post('/api/resim-yukle', adminYetkiKontrol, upload.array('resimler', 35), (req, res) => {
   if (!req.files || req.files.length === 0)
     return res.status(400).json({ hata: 'Dosya yüklenmedi' });
   const urls = req.files.map(f => '/uploads/' + f.filename);
@@ -90,7 +120,7 @@ app.get('/api/ilanlar/:id', (req, res) => {
 });
 
 // === YENİ İLAN EKLE ===
-app.post('/api/ilanlar', (req, res) => {
+app.post('/api/ilanlar', adminYetkiKontrol, (req, res) => {
   const {
     baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, resim, resimler, aciklama,
     kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
@@ -119,14 +149,14 @@ app.post('/api/ilanlar', (req, res) => {
 });
 
 // === İLAN SİL ===
-app.delete('/api/ilanlar/:id', (req, res) => {
+app.delete('/api/ilanlar/:id', adminYetkiKontrol, (req, res) => {
   const sonuc = db.prepare('DELETE FROM ilanlar WHERE id = ?').run(req.params.id);
   if (sonuc.changes === 0) return res.status(404).json({ hata: 'İlan bulunamadı' });
   res.json({ mesaj: 'İlan silindi' });
 });
 
 // === İLAN GÜNCELLE ===
-app.put('/api/ilanlar/:id', (req, res) => {
+app.put('/api/ilanlar/:id', adminYetkiKontrol, (req, res) => {
   const {
     baslik, konum, fiyat, tip, emlak_tipi, oda, metrekare, resim, resimler, aciklama,
     kat, bina_yasi, isitma, ozellikler, banyo, teras, balkon, esyali, site,
@@ -195,7 +225,7 @@ app.get('/api/danismanlar/:id/ilanlar', (req, res) => {
   res.json(ilanlar);
 });
 // === DANIŞMAN EKLE ===
-app.post('/api/danismanlar', (req, res) => {
+app.post('/api/danismanlar', adminYetkiKontrol, (req, res) => {
   const { ad, telefon, foto } = req.body;
   if (!ad || !telefon) return res.status(400).json({ hata: 'Ad ve telefon zorunlu!' });
   const sonuc = db.prepare('INSERT INTO danismanlar (ad, telefon, foto) VALUES (?, ?, ?)').run(ad, telefon, foto || '');
@@ -203,14 +233,14 @@ app.post('/api/danismanlar', (req, res) => {
 });
 
 // === DANIŞMAN SİL ===
-app.delete('/api/danismanlar/:id', (req, res) => {
+app.delete('/api/danismanlar/:id', adminYetkiKontrol, (req, res) => {
   const sonuc = db.prepare('DELETE FROM danismanlar WHERE id = ?').run(req.params.id);
   if (sonuc.changes === 0) return res.status(404).json({ hata: 'Danışman bulunamadı' });
   res.json({ mesaj: 'Danışman silindi' });
 });
 
 // === DANIŞMAN GÜNCELLE ===
-app.put('/api/danismanlar/:id', (req, res) => {
+app.put('/api/danismanlar/:id', adminYetkiKontrol, (req, res) => {
   const { ad, telefon } = req.body;
   if (!ad || !telefon) return res.status(400).json({ hata: 'Ad ve telefon zorunlu!' });
   const sonuc = db.prepare('UPDATE danismanlar SET ad=?, telefon=? WHERE id=?').run(ad, telefon, req.params.id);
@@ -245,11 +275,11 @@ app.post('/api/iletisim', async (req, res) => {
       html: `
         <h2>Yeni İletişim Formu Mesajı</h2>
         <table style="border-collapse:collapse;width:100%;">
-          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">Ad Soyad</td><td style="padding:8px;border:1px solid #ddd;">${ad_soyad}</td></tr>
-          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">Telefon</td><td style="padding:8px;border:1px solid #ddd;">${telefon}</td></tr>
-          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">E-posta</td><td style="padding:8px;border:1px solid #ddd;">${email}</td></tr>
-          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">Konu</td><td style="padding:8px;border:1px solid #ddd;">${konu}</td></tr>
-          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">Mesaj</td><td style="padding:8px;border:1px solid #ddd;">${mesaj}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">Ad Soyad</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(ad_soyad)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">Telefon</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(telefon)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">E-posta</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(email)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">Konu</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(konu)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #ddd;background:#f9f9f9;font-weight:bold;">Mesaj</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(mesaj)}</td></tr>
         </table>
       `
     });

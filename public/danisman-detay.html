@@ -530,24 +530,39 @@
     </div>
 
     <script>
-        // === ŞİFRE KORUMA ===
-        let ADMIN_SIFRE = '';
-        fetch('/api/config')
-            .then(r => r.json())
-            .then(config => { ADMIN_SIFRE = config.adminSifre; });
+        // === ŞİFRE KORUMA (sunucu tarafında doğrulanır) ===
+        // Tüm fetch çağrılarına otomatik olarak admin token'ı ekler.
+        const _orijinalFetch = window.fetch;
+        window.fetch = function (url, options = {}) {
+            const token = sessionStorage.getItem('adminToken');
+            if (token) {
+                options.headers = Object.assign({}, options.headers, { 'x-admin-token': token });
+            }
+            return _orijinalFetch(url, options);
+        };
 
-        function sifreKontrol() {
+        async function sifreKontrol() {
             const girilen = document.getElementById('sifre-input').value;
-            if (girilen === ADMIN_SIFRE) {
-                document.getElementById('sifre-ekrani').style.display = 'none';
-                sessionStorage.setItem('adminGiris', 'true');
-            } else {
+            try {
+                const cevap = await _orijinalFetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sifre: girilen })
+                });
+                if (cevap.ok) {
+                    const veri = await cevap.json();
+                    sessionStorage.setItem('adminToken', veri.token);
+                    document.getElementById('sifre-ekrani').style.display = 'none';
+                } else {
+                    throw new Error('Hatalı şifre');
+                }
+            } catch {
                 document.getElementById('sifre-hata').style.display = 'block';
                 document.getElementById('sifre-input').value = '';
                 document.getElementById('sifre-input').focus();
             }
         }
-        if (sessionStorage.getItem('adminGiris') === 'true') {
+        if (sessionStorage.getItem('adminToken')) {
             document.getElementById('sifre-ekrani').style.display = 'none';
         }
 

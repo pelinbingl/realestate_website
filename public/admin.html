@@ -21,56 +21,19 @@
 
 <body>
     <!-- ŞİFRE EKRANI -->
-    <div id="sifre-ekrani" style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #111;
-        z-index: 99999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      ">
-        <div style="
-          background: #fff;
-          border-radius: 16px;
-          padding: 40px;
-          width: 360px;
-          text-align: center;
-          box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
-        ">
-            <img src="logo.png" alt="Logo" style="width: 80px; border-radius: 50%; margin-bottom: 16px" />
-            <h2 style="margin: 0 0 8px; color: #111">Admin Paneli</h2>
-            <p style="color: #999; font-size: 14px; margin-bottom: 24px">
+    <div id="sifre-ekrani" class="sifre-overlay">
+        <div class="sifre-kutu">
+            <img src="logo.png" alt="Logo" class="sifre-logo" />
+            <h2 class="sifre-baslik">Admin Paneli</h2>
+            <p class="sifre-aciklama">
                 Devam etmek için şifrenizi girin
             </p>
-            <input type="password" id="sifre-input" placeholder="Şifre" style="
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            outline: none;
-            box-sizing: border-box;
-            margin-bottom: 12px;
-          " onfocus="this.style.borderColor = '#f9e01a'" onblur="this.style.borderColor = '#ddd'"
+            <input type="password" id="sifre-input" placeholder="Şifre" class="sifre-input"
                 onkeydown="if (event.key === 'Enter') sifreKontrol();" />
-            <button onclick="sifreKontrol()" style="
-            width: 100%;
-            background: #f9e01a;
-            color: #111;
-            border: none;
-            padding: 13px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-          ">
+            <button onclick="sifreKontrol()" class="sifre-giris-btn">
                 Giriş Yap
             </button>
-            <p id="sifre-hata" style="color: red; font-size: 13px; margin-top: 10px; display: none">
+            <p id="sifre-hata" class="sifre-hata-mesaj">
                 ❌ Hatalı şifre!
             </p>
         </div>
@@ -78,12 +41,7 @@
 
     <header>
         <div class="logo">
-            <a href="/" style="
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-          ">
+            <a href="/" class="admin-logo-link">
                 <img src="logo.png" alt="Emlak Durağı Logo" class="logo-img" />
                 <div class="logo-text">
                     <span class="logo-main">EMLAK DURAĞI</span>
@@ -93,41 +51,16 @@
         </div>
         <nav>
             <a href="/">← Siteye Dön</a>
-            <button onclick="cikisYap()" style="
-              background: none;
-              border: 1px solid #fff;
-              color: #fff;
-              padding: 8px 16px;
-              border-radius: 6px;
-              cursor: pointer;
-              font-weight: 600;
-              font-size: 13px;
-              margin-left: 12px;
-            ">🚪 Çıkış Yap</button>
+            <button onclick="cikisYap()" class="cikis-btn">🚪 Çıkış Yap</button>
         </nav>
     </header>
 
     <div class="admin-container">
         <!-- SOL: FORM -->
         <div class="admin-form-section">
-            <div style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-          ">
-                <h2 id="form-baslik" style="margin: 0">➕ Yeni İlan Ekle</h2>
-                <button id="iptal-btn" onclick="duzenlemeyiIptal()" style="
-              display: none;
-              background: #eee;
-              color: #555;
-              border: none;
-              padding: 8px 14px;
-              border-radius: 8px;
-              cursor: pointer;
-              font-size: 13px;
-              font-weight: 600;
-            ">
+            <div class="form-baslik-satir">
+                <h2 id="form-baslik" style="margin:0;">➕ Yeni İlan Ekle</h2>
+                <button id="iptal-btn" onclick="duzenlemeyiIptal()" class="iptal-btn">
                     ✕ İptal
                 </button>
             </div>
@@ -146,12 +79,12 @@
                 <input type="text" id="baslik" placeholder="örn: Satılık 2+1 Daire" />
             </div>
 
-            <div style="display:flex; gap:12px;">
-                <div class="form-group" style="flex:1;">
+            <div class="form-satir-2">
+                <div class="form-group">
                     <label>İlçe (İzmir)</label>
                     <select id="ilce-sec" onchange="mahalleleriDoldur()"></select>
                 </div>
-                <div class="form-group" style="flex:1;">
+                <div class="form-group">
                     <label>Mahalle</label>
                     <select id="mahalle-sec" onchange="konumGuncelle()"></select>
                 </div>
@@ -159,27 +92,23 @@
 
             <div class="form-group">
                 <label>Sokak / Detay (opsiyonel)</label>
-                <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <input type="text" id="sokak" placeholder="Sokak" oninput="konumGuncelle()"
-                        style="flex:1; min-width:140px;" />
-                    <input type="text" id="detay" placeholder="Detay (blok, no vb.)" oninput="konumGuncelle()"
-                        style="flex:1; min-width:140px;" />
+                <div class="form-satir-inline">
+                    <input type="text" id="sokak" placeholder="Sokak" oninput="konumGuncelle()" />
+                    <input type="text" id="detay" placeholder="Detay (blok, no vb.)" oninput="konumGuncelle()" />
                 </div>
             </div>
 
             <div class="form-group">
-                <label style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                    <span>Konum <span style="color:#999;font-weight:400;font-size:12px">(seçimlere göre otomatik
-                            dolar)</span></span>
-                    <span style="display:flex; gap:10px; font-weight:400;">
-                        <a href="#" onclick="konumHaritadaAc(event)"
-                            style="font-size:12px;color:#2196F3;text-decoration:none;">🗺️ Haritada önizle</a>
+                <label class="konum-etiket-satir">
+                    <span>Konum <span class="yardimci-metin">(seçimlere göre otomatik dolar)</span></span>
+                    <span class="konum-link-grup">
+                        <a href="#" onclick="konumHaritadaAc(event)" class="konum-link-mavi">🗺️ Haritada önizle</a>
                         <a href="#" onclick="konumDuzenlemeyiAc(event)" id="konum-duzenle-link"
-                            style="font-size:12px;color:#f9a01a;text-decoration:none;">✏️ Elle düzenle</a>
+                            class="konum-link-turuncu">✏️ Elle düzenle</a>
                     </span>
                 </label>
                 <textarea id="konum" rows="2" placeholder="örn: İzmir, Aliağa" readonly
-                    style="background:#f7f7f7; cursor:not-allowed;"></textarea>
+                    class="konum-textarea-kilitli"></textarea>
             </div>
 
             <div class="form-group">
@@ -195,12 +124,12 @@
                 </select>
             </div>
 
-            <div style="display:flex; gap:12px;">
-                <div class="form-group" id="brut-metrekare-alani" style="flex:1;">
+            <div class="form-satir-2">
+                <div class="form-group" id="brut-metrekare-alani">
                     <label>Brüt Metrekare (m²)</label>
                     <input type="number" id="metrekare_brut" placeholder="örn: 135" />
                 </div>
-                <div class="form-group" style="flex:1;">
+                <div class="form-group">
                     <label id="net-metrekare-etiket">Net Metrekare (m²)</label>
                     <input type="number" id="metrekare" placeholder="örn: 120" />
                 </div>
@@ -317,7 +246,7 @@
             </div>
 
             <!-- ARSA ALANLARI -->
-            <div id="arsa-alanlari" style="display: none">
+            <div id="arsa-alanlari" class="gizli-alan">
                 <div class="form-group">
                     <label>Arsa Tipi</label>
                     <select id="emlak_tipi_arsa">
@@ -339,9 +268,9 @@
                 </div>
                 <div class="form-group">
                     <label>Ada / Parsel (opsiyonel)</label>
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" id="ada" placeholder="Ada" style="flex:1;" />
-                        <input type="text" id="parsel" placeholder="Parsel" style="flex:1;" />
+                    <div class="form-satir-inline-dar">
+                        <input type="text" id="ada" placeholder="Ada" />
+                        <input type="text" id="parsel" placeholder="Parsel" />
                     </div>
                 </div>
                 <div class="form-group">
@@ -372,62 +301,54 @@
             <!-- RESİM YÜKLEME -->
             <div class="form-group">
                 <label>Fotoğraflar (max 35 adet) —
-                    <span style="color: #f9a01a; font-size: 13px">Kapak için fotoğrafa tıkla</span></label>
-                <div id="mevcut-resimler" style="display: none; margin-bottom: 12px">
-                    <p style="font-size: 12px; color: #777; margin-bottom: 6px">
+                    <span class="foto-ipucu">Kapak için fotoğrafa tıkla</span></label>
+                <div id="mevcut-resimler" class="mevcut-resimler-kutu">
+                    <p class="mevcut-resimler-aciklama">
                         📌 Mevcut resimler — silmek için ✕'e, kapak yapmak için fotoğrafa tıkla:
                     </p>
-                    <div id="mevcut-resimler-grid" style="display: flex; gap: 6px; flex-wrap: wrap"></div>
+                    <div id="mevcut-resimler-grid" class="mevcut-resimler-grid-ic"></div>
                 </div>
                 <div class="resim-yukle-alan" id="resim-yukle-alan"
                     onclick="document.getElementById('resim-input').click()" ondragover="surukle(event)"
                     ondrop="birak(event)">
-                    <span style="font-size: 32px">📸</span>
+                    <span class="resim-yukle-emoji">📸</span>
                     <p>Fotoğraf eklemek için tıkla veya sürükle bırak</p>
-                    <span style="font-size: 12px; color: #aaa">JPG, PNG, WEBP — Max 5MB</span>
+                    <span class="resim-yukle-hint">JPG, PNG, WEBP — Max 5MB</span>
                 </div>
-                <input type="file" id="resim-input" multiple accept="image/*" style="display: none"
+                <input type="file" id="resim-input" multiple accept="image/*" class="gizli-alan"
                     onchange="resimSecildi(this.files)" />
                 <div class="onizleme-grid" id="onizleme-grid"></div>
             </div>
 
             <div class="form-group">
                 <label>Açıklama (opsiyonel)</label>
-                <div class="editor-toolbar"
-                    style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;background:#f5f5f5;padding:6px;border-radius:8px 8px 0 0;border:1px solid #ddd;border-bottom:none;">
+                <div class="editor-toolbar">
                     <button type="button" onclick="editorKomut('bold')" title="Kalın"
-                        style="font-weight:700;width:32px;height:32px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;">B</button>
+                        class="editor-btn editor-btn-bold">B</button>
                     <button type="button" onclick="editorKomut('italic')" title="İtalik"
-                        style="font-style:italic;width:32px;height:32px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;">I</button>
+                        class="editor-btn editor-btn-italic">I</button>
                     <button type="button" onclick="editorKomut('underline')" title="Altı çizili"
-                        style="text-decoration:underline;width:32px;height:32px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;">U</button>
+                        class="editor-btn editor-btn-underline">U</button>
                     <button type="button" onclick="editorKomut('insertUnorderedList')" title="Madde işaretli liste"
-                        style="width:32px;height:32px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;">•≡</button>
+                        class="editor-btn">•≡</button>
                     <button type="button" onclick="editorKomut('insertOrderedList')" title="Numaralı liste"
-                        style="width:32px;height:32px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;">1≡</button>
+                        class="editor-btn">1≡</button>
                     <button type="button" onclick="editorKomut('removeFormat')" title="Biçimlendirmeyi temizle"
-                        style="width:32px;height:32px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;">✕</button>
+                        class="editor-btn">✕</button>
                 </div>
-                <div id="aciklama-editor" contenteditable="true"
-                    style="min-height:90px;border:2px solid #ddd;border-top:1px solid #ddd;border-radius:0 0 8px 8px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;"
+                <div id="aciklama-editor" contenteditable="true" class="zengin-editor-kutu"
                     oninput="document.getElementById('aciklama').value = document.getElementById('aciklama-editor').innerHTML"
-                    onfocus="this.style.borderColor='#f9e01a'" onblur="this.style.borderColor='#ddd'"
                     data-placeholder="İlan hakkında kısa açıklama..."></div>
-                <textarea id="aciklama" style="display:none"></textarea>
+                <textarea id="aciklama" class="gizli-alan"></textarea>
             </div>
 
-            <div id="mesaj" class="admin-mesaj" style="display: none"></div>
+            <div id="mesaj" class="admin-mesaj gizli-alan"></div>
 
-            <div id="yuklenme-durumu" style="display: none; margin-bottom: 12px">
-                <div style="background: #eee; border-radius: 6px; overflow: hidden">
-                    <div id="progress-bar" style="
-                height: 8px;
-                background: #f9e01a;
-                width: 0%;
-                transition: width 0.3s;
-              "></div>
+            <div id="yuklenme-durumu" class="gizli-alan" style="margin-bottom:12px;">
+                <div class="yukleniyor-track">
+                    <div id="progress-bar" class="yukleniyor-bar"></div>
                 </div>
-                <p style="font-size: 13px; color: #777; margin-top: 6px" id="yuklenme-metin">
+                <p class="yukleniyor-metin" id="yuklenme-metin">
                     Resimler yükleniyor...
                 </p>
             </div>
@@ -440,43 +361,18 @@
         <!-- SAĞ: DANIŞMANLAR + MEVCUT İLANLAR -->
         <div class="admin-list-section">
             <h2>👤 Danışmanlar</h2>
-            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap">
-                <input type="text" id="danisman-ad" placeholder="Ad Soyad" style="
-              flex: 1;
-              min-width: 120px;
-              padding: 10px;
-              border: 2px solid #ddd;
-              border-radius: 8px;
-              outline: none;
-              font-size: 14px;
-            " onfocus="this.style.borderColor = '#f9e01a'" onblur="this.style.borderColor = '#ddd'" />
-                <input type="text" id="danisman-tel" placeholder="05XX XXX XX XX" style="
-              flex: 1;
-              min-width: 120px;
-              padding: 10px;
-              border: 2px solid #ddd;
-              border-radius: 8px;
-              outline: none;
-              font-size: 14px;
-            " onfocus="this.style.borderColor = '#f9e01a'" onblur="this.style.borderColor = '#ddd'" />
-                <button onclick="danismanEkle()" style="
-              background: #f9e01a;
-              color: #111;
-              border: none;
-              padding: 10px 16px;
-              border-radius: 8px;
-              cursor: pointer;
-              font-weight: 700;
-              white-space: nowrap;
-            ">
+            <div class="danisman-ekle-satir">
+                <input type="text" id="danisman-ad" placeholder="Ad Soyad" class="danisman-input" />
+                <input type="text" id="danisman-tel" placeholder="05XX XXX XX XX" class="danisman-input" />
+                <button onclick="danismanEkle()" class="danisman-ekle-btn">
                     ➕ Ekle
                 </button>
             </div>
-            <div id="danisman-listesi" style="margin-bottom: 32px"></div>
+            <div id="danisman-listesi" class="danisman-listesi-kutu"></div>
 
             <h2>📋 Mevcut İlanlar</h2>
             <div id="admin-ilanlar">
-                <p style="color: #999; font-size: 14px">Yükleniyor...</p>
+                <p class="bos-liste-metin">Yükleniyor...</p>
             </div>
         </div>
     </div>
@@ -722,10 +618,10 @@
                         const kapakMi = anaResimTipi === "mevcut" && index === anaResimIndex;
                         return `
                         <div class="onizleme-kart ${kapakMi ? "ana-resim-secili" : ""}"
-                             onclick="anaResimSec('mevcut', ${index})" style="cursor:pointer;">
+                             onclick="anaResimSec('mevcut', ${index})">
                             <img src="${url.trim()}" alt="Mevcut resim ${index + 1}">
                             <button class="onizleme-sil" onclick="event.stopPropagation(); mevcutResimSil(${index})">✕</button>
-                            <span class="ana-resim-etiket" style="${kapakMi ? "" : "background:#999;"}">
+                            <span class="ana-resim-etiket ${kapakMi ? "" : "pasif-etiket"}">
                                 ${kapakMi ? "⭐ Kapak" : "Kapak Seç"}
                             </span>
                         </div>`;
@@ -744,10 +640,10 @@
                     const kapakMi = anaResimTipi === "yeni" && index === anaResimIndex;
                     return `
                     <div class="onizleme-kart ${kapakMi ? "ana-resim-secili" : ""}"
-                         id="onizleme-${index}" onclick="anaResimSec('yeni', ${index})" style="cursor:pointer;">
+                         id="onizleme-${index}" onclick="anaResimSec('yeni', ${index})">
                         <img src="${url}" alt="Önizleme ${index + 1}">
                         <button class="onizleme-sil" onclick="event.stopPropagation(); resimSil(${index})">✕</button>
-                        <span class="ana-resim-etiket" style="${kapakMi ? "" : "background:#999;"}">
+                        <span class="ana-resim-etiket ${kapakMi ? "" : "pasif-etiket"}">
                             ${kapakMi ? "⭐ Kapak" : "Kapak Seç"}
                         </span>
                     </div>`;
@@ -929,42 +825,30 @@
             const liste = document.getElementById("danisman-listesi");
             if (danismanlar.length === 0) {
                 liste.innerHTML =
-                    '<p style="color:#999;font-size:13px;">Henüz danışman eklenmedi.</p>';
+                    '<p class="bos-liste-metin" style="font-size:13px;">Henüz danışman eklenmedi.</p>';
                 return;
             }
 
             liste.innerHTML = danismanlar
                 .map(
                     (d) => `
-                <div style="background:#f9f9f9;border-radius:8px;margin-bottom:8px;overflow:hidden;" id="danisman-satir-${d.id}">
-                    <div id="danisman-goruntule-${d.id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;">
+                <div class="danisman-satir-kutu" id="danisman-satir-${d.id}">
+                    <div id="danisman-goruntule-${d.id}" class="danisman-goruntule-satir">
                         <div>
-                           <a href="/danisman-detay?id=${d.id}" style="font-size:14px;font-weight:700;color:#111;text-decoration:none;border-bottom:2px solid #f9e01a;">👤 ${d.ad}</a>
-                           <span style="color:#777;font-size:13px;margin-left:8px;">📞 ${d.telefon}</span>
+                           <a href="/danisman-detay?id=${d.id}" class="danisman-link">👤 ${d.ad}</a>
+                           <span class="danisman-tel-etiket">📞 ${d.telefon}</span>
                         </div>
-                        <div style="display:flex;gap:6px;">
-                            <button onclick="danismanDuzenleAc(${d.id})" style="
-                                background:#f9e01a;color:#111;border:none;padding:6px 12px;
-                                border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;">✏️</button>
-                            <button onclick="danismanSil(${d.id})" style="
-                                background:#ff4444;color:#fff;border:none;padding:6px 12px;
-                                border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">Sil</button>
+                        <div class="danisman-aksiyon-grubu">
+                            <button onclick="danismanDuzenleAc(${d.id})" class="danisman-duzenle-btn-kucuk">✏️</button>
+                            <button onclick="danismanSil(${d.id})" class="danisman-sil-btn-kucuk">Sil</button>
                         </div>
                     </div>
-                    <div id="danisman-duzenle-${d.id}" style="display:none;padding:10px 12px;border-top:2px solid #f9e01a;">
-                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                            <input type="text" id="danisman-duzenle-ad-${d.id}" value="${d.ad}"
-                                style="flex:1;min-width:100px;padding:8px;border:2px solid #ddd;border-radius:6px;outline:none;font-size:13px;"
-                                onfocus="this.style.borderColor='#f9e01a'" onblur="this.style.borderColor='#ddd'">
-                            <input type="text" id="danisman-duzenle-tel-${d.id}" value="${d.telefon}"
-                                style="flex:1;min-width:100px;padding:8px;border:2px solid #ddd;border-radius:6px;outline:none;font-size:13px;"
-                                onfocus="this.style.borderColor='#f9e01a'" onblur="this.style.borderColor='#ddd'">
-                            <button onclick="danismanGuncelle(${d.id})" style="
-                                background:#111;color:#fff;border:none;padding:8px 12px;
-                                border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">💾 Kaydet</button>
-                            <button onclick="danismanDuzenleKapat(${d.id})" style="
-                                background:#eee;color:#555;border:none;padding:8px 12px;
-                                border-radius:6px;cursor:pointer;font-size:12px;">İptal</button>
+                    <div id="danisman-duzenle-${d.id}" class="danisman-duzenle-form">
+                        <div class="danisman-duzenle-satir">
+                            <input type="text" id="danisman-duzenle-ad-${d.id}" value="${d.ad}" class="danisman-duzenle-input">
+                            <input type="text" id="danisman-duzenle-tel-${d.id}" value="${d.telefon}" class="danisman-duzenle-input">
+                            <button onclick="danismanGuncelle(${d.id})" class="danisman-kaydet-btn">💾 Kaydet</button>
+                            <button onclick="danismanDuzenleKapat(${d.id})" class="danisman-iptal-btn">İptal</button>
                         </div>
                     </div>
                 </div>
@@ -1204,36 +1088,34 @@
             const container = document.getElementById("admin-ilanlar");
             if (ilanlar.length === 0) {
                 container.innerHTML =
-                    '<p style="color:#999;font-size:14px;">Henüz ilan yok.</p>';
+                    '<p class="bos-liste-metin">Henüz ilan yok.</p>';
                 return;
             }
             container.innerHTML = ilanlar
                 .map(
                     (ilan) => `
                 <div class="admin-ilan-satir">
-                    <div style="display:flex;gap:12px;align-items:center;">
+                    <div class="admin-ilan-sol">
                         <img src="${ilan.resim || ""}" alt=""
                              onerror="this.style.display='none'"
-                             style="${ilan.resim ? "width:60px;height:45px;object-fit:cover;border-radius:4px;" : "display:none"}">
-                        ${!ilan.resim ? `<div style="width:60px;height:45px;background:#f0f0f0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px;">🏠</div>` : ""}
+                             class="${ilan.resim ? "admin-ilan-resim-kucuk" : "gizli-alan"}">
+                        ${!ilan.resim ? `<div class="admin-ilan-resim-placeholder">🏠</div>` : ""}
                         <div class="admin-ilan-bilgi">
                             <strong>${ilan.baslik}</strong>
                             <span>📍 ${ilan.konum}</span>
-                            <span style="font-size:12px;color:#777;">👤 ${ilan.danisman_ad || "Oktay Bingöl"}</span>
-                            <div style="display:flex;gap:6px;margin-top:4px;">
+                            <span class="admin-ilan-danisman-etiket">👤 ${ilan.danisman_ad || "Oktay Bingöl"}</span>
+                            <div class="admin-ilan-etiket-satir">
                                 <span class="badge ${ilan.tip === "kiralik" ? "kiralik-badge" : "satilik-badge"}">
                                     ${ilan.tip === "kiralik" ? "Kiralık" : "Satılık"}
                                 </span>
-                                <span style="background:#eee;color:#555;padding:3px 8px;border-radius:4px;font-size:11px;">
+                                <span class="admin-ilan-tip-etiket">
                                     ${ilan.emlak_tipi}
                                 </span>
                             </div>
                         </div>
                     </div>
-                    <div style="display:flex;gap:6px;">
-                        <button onclick="ilanDuzenle(${ilan.id})" style="
-                            background:#f9e01a;color:#111;border:none;padding:8px 12px;
-                            border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;">✏️ Düzenle</button>
+                    <div class="admin-ilan-aksiyonlar">
+                        <button onclick="ilanDuzenle(${ilan.id})" class="admin-ilan-duzenle-btn">✏️ Düzenle</button>
                         <button class="sil-btn" onclick="ilanSil(${ilan.id})">🗑 Sil</button>
                     </div>
                 </div>

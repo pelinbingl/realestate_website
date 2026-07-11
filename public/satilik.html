@@ -58,7 +58,14 @@
 
             <div class="filtre-grup">
                 <label>İlçe</label>
-                <select id="f-ilce">
+                <select id="f-ilce" onchange="mahalleFiltresiDoldur()">
+                    <option value="">Tümü</option>
+                </select>
+            </div>
+
+            <div class="filtre-grup">
+                <label>Mahalle</label>
+                <select id="f-mahalle">
                     <option value="">Tümü</option>
                 </select>
             </div>
@@ -163,6 +170,19 @@
             });
         });
 
+        // İlçe seçilince o ilçeye ait mahalleleri Mahalle filtresine doldurur.
+        function mahalleFiltresiDoldur() {
+            const ilce = document.getElementById('f-ilce').value;
+            const mahalleSec = document.getElementById('f-mahalle');
+            mahalleSec.innerHTML = '<option value="">Tümü</option>';
+            (IZMIR_MAHALLELERI[ilce] || []).forEach((mahalle) => {
+                const opt = document.createElement('option');
+                opt.value = mahalle;
+                opt.textContent = mahalle;
+                mahalleSec.appendChild(opt);
+            });
+        }
+
         async function ilanlariYukle() {
             try {
                 const cevap = await fetch('/api/ilanlar?tip=satilik');
@@ -219,6 +239,7 @@
         function filtreUygula() {
             const emlakTuru = document.getElementById('f-emlak-turu').value;
             const ilce = document.getElementById('f-ilce').value;
+            const mahalle = document.getElementById('f-mahalle').value;
             const oda = document.getElementById('f-oda').value;
             const minFiyat = Number(document.getElementById('f-min-fiyat').value) || 0;
             const maxFiyat = Number(document.getElementById('f-max-fiyat').value) || Infinity;
@@ -228,6 +249,7 @@
             const filtrelenmis = tumIlanlar.filter(ilan => {
                 if (emlakTuru && ilan.emlak_tipi !== emlakTuru) return false;
                 if (ilce && !(ilan.konum || '').includes(ilce)) return false;
+                if (mahalle && !(ilan.konum || '').includes(mahalle)) return false;
                 if (oda && ilan.oda !== oda) return false;
                 if (ilan.fiyat < minFiyat || ilan.fiyat > maxFiyat) return false;
                 if (ilan.metrekare < minM2) return false;
@@ -253,6 +275,7 @@
         function filtreleriTemizle() {
             document.getElementById('f-emlak-turu').value = '';
             document.getElementById('f-ilce').value = '';
+            document.getElementById('f-mahalle').innerHTML = '<option value="">Tümü</option>';
             document.getElementById('f-oda').value = '';
             document.getElementById('f-min-fiyat').value = '';
             document.getElementById('f-max-fiyat').value = '';

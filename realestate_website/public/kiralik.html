@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/images/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/images/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiralık İlanlar | Emlak Durağı</title>
+    <meta name="description"
+        content="Aliağa ve İzmir'de kiralık daire ve residence ilanları. Uygun fiyatlı, güncel kiralık ev seçenekleri Emlak Durağı'nda.">
+    <link rel="canonical" href="https://www.emlakduragim.com/kiralik">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Kiralık İlanlar | Emlak Durağı">
+    <meta property="og:description"
+        content="Aliağa ve İzmir'de kiralık daire ve residence ilanları. Uygun fiyatlı, güncel kiralık ev seçenekleri Emlak Durağı'nda.">
+    <meta property="og:url" content="https://www.emlakduragim.com/kiralik">
+    <meta property="og:image" content="https://www.emlakduragim.com/images/icon-512.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Kiralık İlanlar | Emlak Durağı">
+    <meta name="twitter:description"
+        content="Aliağa ve İzmir'de kiralık daire ve residence ilanları. Uygun fiyatlı, güncel kiralık ev seçenekleri Emlak Durağı'nda.">
+    <meta name="twitter:image" content="https://www.emlakduragim.com/images/icon-512.png">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/il-ilce-data.js"></script>
+    <script src="/js/components.js"></script>
+</head>
+
+<body>
+
+    <!-- ORTAK HEADER -->
+    <div id="header-alani"></div>
+
+    <div class="liste-container">
+
+        <!-- SOL: FİLTRE PANELİ -->
+        <div class="filtre-panel">
+
+            <div class="filtre-baslik">
+                <span>Filtreler</span>
+                <button onclick="filtreleriTemizle()">Temizle</button>
+            </div>
+
+            <div class="filtre-grup">
+                <label>İlan Türü</label>
+                <div class="filtre-ilan-turu">Kiralık</div>
+            </div>
+
+            <div class="filtre-grup">
+                <label>İlçe</label>
+                <select id="f-ilce">
+                    <option value="">Tümü</option>
+                </select>
+            </div>
+
+            <div class="filtre-grup">
+                <label>Emlak Türü</label>
+                <select id="f-emlak-turu">
+                    <option value="">Tümü</option>
+                    <option value="Konut">Konut / Daire</option>
+                    <option value="Villa">Villa</option>
+                    <option value="Müstakil">Müstakil Ev</option>
+                    <option value="Residence">Residence</option>
+                    <option value="İşyeri">İşyeri</option>
+                </select>
+            </div>
+
+            <div class="filtre-grup">
+                <label>Oda Sayısı</label>
+                <select id="f-oda">
+                    <option value="">Tümü</option>
+                    <option value="1+1">1+1</option>
+                    <option value="2+1">2+1</option>
+                    <option value="3+1">3+1</option>
+                    <option value="4+1">4+1</option>
+                    <option value="5+1">5+1</option>
+                </select>
+            </div>
+
+            <div class="filtre-grup">
+                <label>Fiyat Aralığı (₺)</label>
+                <div class="fiyat-aralik">
+                    <input type="number" id="f-min-fiyat" placeholder="Min">
+                    <span>—</span>
+                    <input type="number" id="f-max-fiyat" placeholder="Max">
+                </div>
+            </div>
+
+            <div class="filtre-grup">
+                <label>Min m²</label>
+                <input type="number" id="f-min-m2" placeholder="örn: 80">
+            </div>
+
+            <button class="filtre-btn" onclick="filtreUygula()">🔍 Filtrele</button>
+
+        </div>
+
+        <!-- SAĞ: İLAN LİSTESİ -->
+        <div class="liste-icerik">
+
+            <div class="liste-baslik-bar">
+                <h1>Kiralık İlanlar</h1>
+                <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+                    <span id="ilan-sayisi" class="ilan-sayisi">Yükleniyor...</span>
+                    <select id="siralama" onchange="filtreUygula()"
+                        style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-size:13px; color:#444; font-family:inherit; cursor:pointer;">
+                        <option value="yeni">En Yeni</option>
+                        <option value="fiyat-artan">Fiyat: Düşükten Yükseğe</option>
+                        <option value="fiyat-azalan">Fiyat: Yüksekten Düşüğe</option>
+                        <option value="m2-artan">m²: Küçükten Büyüğe</option>
+                        <option value="m2-azalan">m²: Büyükten Küçüğe</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="liste-grid" id="liste-grid"></div>
+
+            <div id="bos-mesaj" style="display:none;" class="bos-mesaj">
+                <span>😕</span>
+                <p>Filtrelere uygun ilan bulunamadı.</p>
+                <button onclick="filtreleriTemizle()">Filtreleri Temizle</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ORTAK FOOTER -->
+    <div id="footer-alani"></div>
+
+    <script>
+        let tumIlanlar = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            ilanlariYukle();
+
+            const ilceSec = document.getElementById('f-ilce');
+            IZMIR_ILCELERI.forEach((ilce) => {
+                const opt = document.createElement('option');
+                opt.value = ilce;
+                opt.textContent = ilce;
+                ilceSec.appendChild(opt);
+            });
+        });
+
+        async function ilanlariYukle() {
+            try {
+                const cevap = await fetch('/api/ilanlar?tip=kiralik');
+                tumIlanlar = await cevap.json();
+                ilanlariGoster(tumIlanlar);
+            } catch (hata) {
+                console.error('Hata:', hata);
+            }
+        }
+
+        function ilanlariGoster(ilanlar) {
+            const grid = document.getElementById('liste-grid');
+            const sayiEl = document.getElementById('ilan-sayisi');
+            const bosEl = document.getElementById('bos-mesaj');
+
+            sayiEl.textContent = ilanlar.length + ' ilan bulundu';
+
+            if (ilanlar.length === 0) {
+                grid.innerHTML = '';
+                bosEl.style.display = 'flex';
+                return;
+            }
+
+            bosEl.style.display = 'none';
+
+            grid.innerHTML = ilanlar.map(ilan => {
+                const fiyat = `₺${ilan.fiyat.toLocaleString('tr-TR')} / ay`;
+                const odaBilgi = ilan.oda ? `<span>⊞ ${escapeHtml(ilan.oda)}</span>` : '';
+                const m2Bilgi = ilan.metrekare ? `<span>⊡ ${ilan.metrekare} m²</span>` : '';
+                const resim = escapeHtml(ilan.resim || 'https://via.placeholder.com/400x250?text=Resim+Yok');
+
+                return `
+                    <div class="liste-kart" onclick="window.location.href='/ilan-detay?id=${ilan.id}'">
+                        <div class="liste-kart-resim">
+                            <img src="${resim}" alt="${escapeHtml(ilan.baslik)}" loading="lazy">
+                            <span class="liste-tip-badge">${escapeHtml(ilan.emlak_tipi)}</span>
+                        </div>
+                        <div class="liste-kart-bilgi">
+                            <h3>${escapeHtml(ilan.baslik)}</h3>
+                            <p class="liste-konum">📍 ${escapeHtml(ilan.konum)}</p>
+                            <div class="liste-detaylar">
+                                ${odaBilgi}
+                                ${m2Bilgi}
+                            </div>
+                            <div class="liste-fiyat">${fiyat}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filtreUygula() {
+            const emlakTuru = document.getElementById('f-emlak-turu').value;
+            const ilce = document.getElementById('f-ilce').value;
+            const oda = document.getElementById('f-oda').value;
+            const minFiyat = Number(document.getElementById('f-min-fiyat').value) || 0;
+            const maxFiyat = Number(document.getElementById('f-max-fiyat').value) || Infinity;
+            const minM2 = Number(document.getElementById('f-min-m2').value) || 0;
+            const siralama = document.getElementById('siralama').value;
+
+            const filtrelenmis = tumIlanlar.filter(ilan => {
+                if (emlakTuru && ilan.emlak_tipi !== emlakTuru) return false;
+                if (ilce && !(ilan.konum || '').includes(ilce)) return false;
+                if (oda && ilan.oda !== oda) return false;
+                if (ilan.fiyat < minFiyat || ilan.fiyat > maxFiyat) return false;
+                if (ilan.metrekare < minM2) return false;
+                return true;
+            });
+
+            siraliListeyiUygula(filtrelenmis, siralama);
+            ilanlariGoster(filtrelenmis);
+        }
+
+        function siraliListeyiUygula(liste, siralama) {
+            const siralayicilar = {
+                'fiyat-artan': (a, b) => a.fiyat - b.fiyat,
+                'fiyat-azalan': (a, b) => b.fiyat - a.fiyat,
+                'm2-artan': (a, b) => (a.metrekare || 0) - (b.metrekare || 0),
+                'm2-azalan': (a, b) => (b.metrekare || 0) - (a.metrekare || 0),
+            };
+            if (siralayicilar[siralama]) liste.sort(siralayicilar[siralama]);
+        }
+
+        function filtreleriTemizle() {
+            document.getElementById('f-emlak-turu').value = '';
+            document.getElementById('f-ilce').value = '';
+            document.getElementById('f-oda').value = '';
+            document.getElementById('f-min-fiyat').value = '';
+            document.getElementById('f-max-fiyat').value = '';
+            document.getElementById('f-min-m2').value = '';
+            document.getElementById('siralama').value = 'yeni';
+            ilanlariGoster(tumIlanlar);
+        }
+    </script>
+
+</body>
+
+</html>

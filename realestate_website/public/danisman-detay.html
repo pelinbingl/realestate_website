@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/images/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/images/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danışman Detay | Emlak Durağı</title>
+    <meta name="description" content="Emlak Durağı gayrimenkul danışmanlarımızın iletişim bilgileri ve ilan portföyü.">
+    <link rel="canonical" href="https://www.emlakduragim.com/danisman-detay">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Danışman Detay | Emlak Durağı">
+    <meta property="og:description"
+        content="Emlak Durağı gayrimenkul danışmanlarımızın iletişim bilgileri ve ilan portföyü.">
+    <meta property="og:url" content="https://www.emlakduragim.com/danisman-detay">
+    <meta property="og:image" content="https://www.emlakduragim.com/images/icon-512.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Danışman Detay | Emlak Durağı">
+    <meta name="twitter:description"
+        content="Emlak Durağı gayrimenkul danışmanlarımızın iletişim bilgileri ve ilan portföyü.">
+    <meta name="twitter:image" content="https://www.emlakduragim.com/images/icon-512.png">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* === GENEL DEĞİŞİKLİKLER & ARKA PLAN === */
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .detay-container {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 24px 60px;
+        }
+
+        /* === ÜST NAVİGASYON VE HEADER === */
+        header {
+            background: #111;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        header .logo-main {
+            color: #fff;
+            font-weight: 800;
+            font-size: 20px;
+            letter-spacing: 1px;
+        }
+
+        header .logo-sub {
+            color: #f9e01a;
+            font-size: 12px;
+            display: block;
+        }
+
+        header nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        header nav a:hover {
+            color: #f9e01a;
+        }
+
+        .geri-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            padding: 10px 18px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 30px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .geri-link:hover {
+            background: #111;
+            color: #fff;
+            border-color: #111;
+        }
+
+        /* === ANA DÜZEN (YENİ ESNEK YAPI) === */
+        .Yonetim-Grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        @media (max-width: 992px) {
+            .Yonetim-Grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* === SOL PANEL: PROFIL KARTI === */
+        .detay-header {
+            background: #111;
+            color: #fff;
+            padding: 40px 24px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .danisman-avatar {
+            width: 90px;
+            height: 90px;
+            background: #f9e01a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 900;
+            color: #111;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(249, 224, 26, 0.3);
+        }
+
+        .danisman-bilgi h1 {
+            margin: 0 0 8px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .danisman-bilgi span {
+            color: #aaa;
+            font-size: 15px;
+            display: block;
+            margin-bottom: 24px;
+        }
+
+        .duzenle-btn-ana {
+            background: #f9e01a;
+            color: #111;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            width: 100%;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .duzenle-btn-ana:hover {
+            background: #e5cc15;
+            transform: translateY(-2px);
+        }
+
+        /* === DANIŞMAN DÜZENLEME FORMU === */
+        .danisman-duzenle-form {
+            display: none;
+            background: #fff;
+            border: 2px solid #f9e01a;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        }
+
+        .danisman-duzenle-form.aktif {
+            display: block;
+        }
+
+        .danisman-duzenle-form input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .danisman-duzenle-form input:focus {
+            border-color: #f9e01a;
+        }
+
+        /* === SAĞ PANEL: ISTATISTIKLER === */
+        .istatistik-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 576px) {
+            .istatistik-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .istat-kart {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px 16px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s;
+        }
+
+        .istat-kart:hover {
+            transform: translateY(-3px);
+        }
+
+        .istat-kart .sayi {
+            font-size: 32px;
+            font-weight: 800;
+            color: #111;
+        }
+
+        .istat-kart .etiket {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        /* === ILANLAR LISTESI VE FILTRE BÖLÜMÜ === */
+        .bolum-baslik {
+            font-size: 20px;
+            font-weight: 800;
+            color: #111;
+        }
+
+        .ilan-filtre {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filtre-btn {
+            padding: 9px 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 30px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .filtre-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .filtre-btn.aktif {
+            background: #111;
+            border-color: #111;
+            color: #fff;
+        }
+
+        /* İLAN SATIRI KART TASARIMI */
+        .detay-ilan-satir {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.01);
+            transition: all 0.2s;
+        }
+
+        .detay-ilan-satir:hover {
+            border-color: #f9e01a;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .detay-ilan-sol {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .detay-ilan-sol img {
+            width: 100px;
+            height: 75px;
+            object-fit: cover;
+            border-radius: 12px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .detay-ilan-bilgi strong {
+            display: block;
+            font-size: 16px;
+            color: #111;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .detay-ilan-bilgi span {
+            display: block;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .detay-ilan-bilgi .fiyat {
+            font-size: 16px;
+            font-weight: 800;
+            color: #111;
+            margin-top: 8px;
+        }
+
+        /* BADGES (ROZETLER) */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .satilik-badge {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .kiralik-badge {
+            background: #dbeafe;
+            color: #3b82f6;
+        }
+
+        /* BUTON GRUPLARI */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-group a,
+        .btn-group button {
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-detay {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-detay:hover {
+            background: #e2e8f0;
+            color: #111;
+        }
+
+        .btn-duzenle {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .btn-duzenle:hover {
+            background: #fde047;
+        }
+
+        .btn-sil {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-sil:hover {
+            background: #fca5a5;
+        }
+
+        .bos-mesaj {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+            font-size: 16px;
+            background: #fff;
+            border-radius: 16px;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .bos-mesaj span {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        /* === ŞİFRE EKRANI GÜNCELLEMESİ === */
+        #sifre-ekrani input:focus {
+            border-color: #f9e01a !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="sifre-ekrani"
+        style="position:fixed;top:0;left:0;width:100%;height:100%;background:#111;z-index:99999;display:flex;align-items:center;justify-content:center;">
+        <div
+            style="background:#fff;border-radius:16px;padding:40px;width:360px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.5);">
+            <img src="logo.jpeg" alt="Logo" style="width:80px;border-radius:50%;margin-bottom:16px;">
+            <h2 style="margin:0 0 8px;color:#111;">Admin Paneli</h2>
+            <p style="color:#999;font-size:14px;margin-bottom:24px;">Devam etmek için şifrenizi girin</p>
+            <input type="password" id="sifre-input" placeholder="Şifre"
+                style="width:100%;padding:12px 16px;border:2px solid #ddd;border-radius:8px;font-size:16px;outline:none;box-sizing:border-box;margin-bottom:12px;"
+                onkeydown="if(event.key==='Enter') sifreKontrol()">
+            <button onclick="sifreKontrol()"
+                style="width:100%;background:#f9e01a;color:#111;border:none;padding:13px;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;">Giriş
+                Yap</button>
+            <p id="sifre-hata" style="color:red;font-size:13px;margin-top:10px;display:none;">❌ Hatalı şifre!</p>
+        </div>
+    </div>
+
+    <header>
+        <div class="logo">
+            <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+                <img src="/images/logo.png" alt="Emlak Durağı Logo" style="width:40px; height:40px; border-radius:50%;">
+                <div class="logo-text">
+                    <span class="logo-main">EMLAK DURAĞI</span>
+                    <span class="logo-sub">Gayrimenkul Danışmanlığı</span>
+                </div>
+            </a>
+        </div>
+        <nav><a href="/admin">← Admin Paneli</a></nav>
+    </header>
+
+    <div class="detay-container">
+        <a href="/admin" class="geri-link">← Admin Paneline Dön</a>
+
+        <div class="Yonetim-Grid">
+
+            <div class="SolPanel">
+                <div class="detay-header" id="danisman-header">
+                    <div class="danisman-avatar" id="danisman-avatar">?</div>
+                    <div class="danisman-bilgi">
+                        <h1 id="danisman-ad-goster">Yükleniyor...</h1>
+                        <span id="danisman-tel-goster">—</span>
+                    </div>
+                    <button onclick="duzenleFormAc()" id="duzenle-ac-btn" class="duzenle-btn-ana">
+                        ✏️ Bilgileri Düzenle
+                    </button>
+                </div>
+
+                <div class="danisman-duzenle-form" id="danisman-duzenle-form">
+                    <h3 style="margin:0 0 16px;font-size:15px;color:#111;">✏️ Bilgileri Güncelle</h3>
+                    <input type="text" id="duzenle-ad" placeholder="Ad Soyad">
+                    <input type="text" id="duzenle-tel" placeholder="05XX XXX XX XX">
+                    <div style="display:flex;gap:8px;margin-top:4px;">
+                        <button onclick="danismanGuncelle()"
+                            style="flex:1; background:#111;color:#fff;border:none;padding:10px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;">💾
+                            Kaydet</button>
+                        <button onclick="duzenleFormKapat()"
+                            style="background:#eee;color:#555;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-size:13px;">İptal</button>
+                    </div>
+                    <div id="guncelle-mesaj"
+                        style="display:none;margin-top:10px;padding:10px;border-radius:8px;font-size:13px;"></div>
+                </div>
+            </div>
+
+            <div class="SagPanel">
+                <div class="istatistik-bar" id="istatistik-bar">
+                    <div class="istat-kart">
+                        <div class="sayi" id="stat-toplam">—</div>
+                        <div class="etiket">Toplam İlan</div>
+                    </div>
+                    <div class="istat-kart">
+                        <div class="sayi" id="stat-satilik">—</div>
+                        <div class="etiket">Satılık</div>
+                    </div>
+                    <div class="istat-kart">
+                        <div class="sayi" id="stat-kiralik">—</div>
+                        <div class="etiket">Kiralık</div>
+                    </div>
+                    <div class="istat-kart">
+                        <div class="sayi" id="stat-arsa">—</div>
+                        <div class="etiket">Arsa / Tarla</div>
+                    </div>
+                </div>
+
+                <div
+                    style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+                    <h2 class="bolum-baslik" style="margin:0;">📋 İlanlar Yönetimi</h2>
+                    <a href="/admin"
+                        style="background:#f9e01a;color:#111;text-decoration:none;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        ➕ Yeni İlan Ekle
+                    </a>
+                </div>
+
+                <div class="ilan-filtre">
+                    <button class="filtre-btn aktif" onclick="filtrele(this,'hepsi')">Hepsi</button>
+                    <button class="filtre-btn" onclick="filtrele(this,'satilik')">Satılık</button>
+                    <button class="filtre-btn" onclick="filtrele(this,'kiralik')">Kiralık</button>
+                    <button class="filtre-btn" onclick="filtrele(this,'arsa')">Arsa / Tarla</button>
+                </div>
+
+                <div id="ilan-listesi">
+                    <p style="color:#999;font-size:14px;">Yükleniyor...</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // === GÜVENLİK: HTML kaçışlama (stored XSS koruması) ===
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        // === ŞİFRE KORUMA (sunucu tarafında doğrulanır) ===
+        // Tüm fetch çağrılarına otomatik olarak admin token'ı ekler.
+        const _orijinalFetch = window.fetch;
+        window.fetch = function (url, options = {}) {
+            const token = sessionStorage.getItem('adminToken');
+            if (token) {
+                options.headers = Object.assign({}, options.headers, { 'x-admin-token': token });
+            }
+            return _orijinalFetch(url, options);
+        };
+
+        async function sifreKontrol() {
+            const girilen = document.getElementById('sifre-input').value;
+            try {
+                const cevap = await _orijinalFetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sifre: girilen })
+                });
+                if (cevap.ok) {
+                    const veri = await cevap.json();
+                    sessionStorage.setItem('adminToken', veri.token);
+                    document.getElementById('sifre-ekrani').style.display = 'none';
+                } else {
+                    throw new Error('Hatalı şifre');
+                }
+            } catch {
+                document.getElementById('sifre-hata').style.display = 'block';
+                document.getElementById('sifre-input').value = '';
+                document.getElementById('sifre-input').focus();
+            }
+        }
+        if (sessionStorage.getItem('adminToken')) {
+            document.getElementById('sifre-ekrani').style.display = 'none';
+        }
+
+        // === DEĞİŞKENLER ===
+        const params = new URLSearchParams(window.location.search);
+        const danismanId = params.get('id');
+        let tumIlanlar = [];
+        let aktifFiltre = 'hepsi';
+
+        if (!danismanId) window.location.href = '/admin';
+
+        // === DANIŞMAN BİLGİLERİ ===
+        async function danismanYukle() {
+            try {
+                const cevap = await fetch(`/api/danismanlar/${danismanId}`);
+                if (!cevap.ok) { window.location.href = '/admin'; return; }
+                const d = await cevap.json();
+
+                const ilkHarf = (d.ad || '?').charAt(0).toUpperCase();
+                document.getElementById('danisman-avatar').textContent = ilkHarf;
+                document.getElementById('danisman-ad-goster').textContent = d.ad;
+                document.getElementById('danisman-tel-goster').textContent = '📞 ' + d.telefon;
+                document.title = d.ad + ' | Emlak Durağı';
+
+                document.getElementById('duzenle-ad').value = d.ad;
+                document.getElementById('duzenle-tel').value = d.telefon;
+            } catch (hata) {
+                console.error('Danışman yüklenemedi:', hata);
+                window.location.href = '/admin';
+            }
+        }
+
+        // === DANIŞMAN GÜNCELLE ===
+        async function danismanGuncelle() {
+            const ad = document.getElementById('duzenle-ad').value.trim();
+            const telefon = document.getElementById('duzenle-tel').value.trim();
+            if (!ad || !telefon) { guncelleMesaj('❌ Ad ve telefon zorunlu!', false); return; }
+
+            const cevap = await fetch(`/api/danismanlar/${danismanId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ad, telefon })
+            });
+
+            if (cevap.ok) {
+                guncelleMesaj('✅ Bilgiler güncellendi!', true);
+                document.getElementById('danisman-ad-goster').textContent = ad;
+                document.getElementById('danisman-tel-goster').textContent = '📞 ' + telefon;
+                document.getElementById('danisman-avatar').textContent = ad.charAt(0).toUpperCase();
+                document.title = ad + ' | Emlak Durağı';
+                setTimeout(duzenleFormKapat, 1200);
+            } else {
+                guncelleMesaj('❌ Güncelleme başarısız!', false);
+            }
+        }
+
+        function guncelleMesaj(metin, basari) {
+            const el = document.getElementById('guncelle-mesaj');
+            el.textContent = metin;
+            el.style.display = 'block';
+            el.style.background = basari ? '#e8f5e9' : '#ffebee';
+            el.style.color = basari ? '#2e7d32' : '#c62828';
+        }
+
+        function duzenleFormAc() {
+            document.getElementById('danisman-duzenle-form').classList.add('aktif');
+            document.getElementById('duzenle-ac-btn').style.display = 'none';
+            document.getElementById('guncelle-mesaj').style.display = 'none';
+        }
+
+        function duzenleFormKapat() {
+            document.getElementById('danisman-duzenle-form').classList.remove('aktif');
+            document.getElementById('duzenle-ac-btn').style.display = 'block';
+        }
+
+        // === İLANLARI YÜKLE ===
+        async function ilanlariYukle() {
+            try {
+                const cevap = await fetch(`/api/danismanlar/${danismanId}/ilanlar`);
+                tumIlanlar = await cevap.json();
+                istatistikGuncelle();
+                ilanlariGoster(tumIlanlar);
+            } catch (hata) {
+                console.error('İlanlar yüklenemedi:', hata);
+                document.getElementById('ilan-listesi').innerHTML = '<p style="color:#e44;font-size:14px;">❌ İlanlar yüklenemedi.</p>';
+            }
+        }
+
+        function istatistikGuncelle() {
+            const arsaTipleri = ['Arsa', 'Tarla', 'Bağ & Bahçe', 'Zeytinlik', 'Çiftlik'];
+            document.getElementById('stat-toplam').textContent = tumIlanlar.length;
+            document.getElementById('stat-satilik').textContent = tumIlanlar.filter(i => i.tip === 'satilik' && !arsaTipleri.includes(i.emlak_tipi)).length;
+            document.getElementById('stat-kiralik').textContent = tumIlanlar.filter(i => i.tip === 'kiralik').length;
+            document.getElementById('stat-arsa').textContent = tumIlanlar.filter(i => arsaTipleri.includes(i.emlak_tipi)).length;
+        }
+
+        function filtrele(btn, filtre) {
+            aktifFiltre = filtre;
+            document.querySelectorAll('.filtre-btn').forEach(b => b.classList.remove('aktif'));
+            btn.classList.add('aktif');
+
+            const arsaTipleri = ['Arsa', 'Tarla', 'Bağ & Bahçe', 'Zeytinlik', 'Çiftlik'];
+            let filtrelenmis = tumIlanlar;
+
+            if (filtre === 'satilik') {
+                filtrelenmis = tumIlanlar.filter(i => i.tip === 'satilik' && !arsaTipleri.includes(i.emlak_tipi));
+            } else if (filtre === 'kiralik') {
+                filtrelenmis = tumIlanlar.filter(i => i.tip === 'kiralik');
+            } else if (filtre === 'arsa') {
+                filtrelenmis = tumIlanlar.filter(i => arsaTipleri.includes(i.emlak_tipi));
+            }
+
+            ilanlariGoster(filtrelenmis);
+        }
+
+        function ilanlariGoster(ilanlar) {
+            const container = document.getElementById('ilan-listesi');
+
+            if (ilanlar.length === 0) {
+                container.innerHTML = `<div class="bos-mesaj"><span>🏠</span>Bu kategoride henüz ilan bulunmuyor.</div>`;
+                return;
+            }
+
+            container.innerHTML = ilanlar.map(ilan => `
+            <div class="detay-ilan-satir" id="ilan-satir-${ilan.id}">
+                <div class="detay-ilan-sol">
+                    <img src="${escapeHtml(ilan.resim || '')}" alt="" loading="lazy" onerror="this.style.display='none'" style="${ilan.resim ? '' : 'display:none'}">
+                    ${!ilan.resim ? `<div style="width:100px;height:75px;background:#f0f0f0;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🏠</div>` : ''}
+                    <div class="detay-ilan-bilgi">
+                        <strong title="${escapeHtml(ilan.baslik)}">${escapeHtml(ilan.baslik)}</strong>
+                        <span>📍 ${escapeHtml(ilan.konum)}</span>
+                        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;">
+                            <span class="badge ${ilan.tip === 'kiralik' ? 'kiralik-badge' : 'satilik-badge'}">
+                                ${ilan.tip === 'kiralik' ? 'Kiralık' : 'Satılık'}
+                            </span>
+                            <span style="background:#f1f5f9;color:#475569;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600;">
+                                ${escapeHtml(ilan.emlak_tipi)}
+                            </span>
+                            ${ilan.metrekare ? `<span style="background:#f1f5f9;color:#475569;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600;">${ilan.metrekare} m²</span>` : ''}
+                        </div>
+                        <div class="fiyat">${fiyatFormat(ilan.fiyat)}</div>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <a href="/ilan-detay?id=${ilan.id}" target="_blank" class="btn-detay" title="Görüntüle">👁</a>
+                    <button class="btn-duzenle" onclick="ilanDuzenleGit(${ilan.id})" title="Düzenle">✏️</button>
+                    <button class="btn-sil" onclick="ilanSil(${ilan.id})" title="Sil">🗑</button>
+                </div>
+            </div>
+        `).join('');
+        }
+
+        function fiyatFormat(fiyat) {
+            if (!fiyat) return '—';
+            return '₺' + Number(fiyat).toLocaleString('tr-TR');
+        }
+
+        function ilanDuzenleGit(ilanId) {
+            window.location.href = '/admin?duzenle=' + ilanId;
+        }
+
+        async function ilanSil(id) {
+            if (!confirm('Bu ilanı silmek istediğinize emin misiniz?')) return;
+            const cevap = await fetch(`/api/ilanlar/${id}`, { method: 'DELETE' });
+            if (cevap.ok) {
+                tumIlanlar = tumIlanlar.filter(i => i.id !== id);
+                istatistikGuncelle();
+                filtrele(document.querySelector('.filtre-btn.aktif'), aktifFiltre);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            danismanYukle();
+            ilanlariYukle();
+        });
+    </script>
+
+</body>
+
+</html>

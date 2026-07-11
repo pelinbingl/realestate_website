@@ -1552,9 +1552,7 @@ footer {
   font-family: inherit;
   color: #444;
   appearance: none;
-  background: white
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555' d='M6 8L1 3h10z'/%3E%3C/svg%3E")
-    no-repeat right 14px center;
+  background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 14px center;
   cursor: pointer;
 }
 
@@ -2005,6 +2003,7 @@ img {
 
 /* === MOBİL (max 768px) === */
 @media (max-width: 768px) {
+
   /* --- TOPBAR --- */
   .topbar {
     flex-direction: column;
@@ -2403,6 +2402,7 @@ img {
   margin: 8px 0;
   padding-left: 22px;
 }
+
 /* ============================================
    ADMIN PANELİ — refactor edilmiş sınıflar
    (önceden inline style olan öğeler buraya taşındı)
@@ -2865,4 +2865,39 @@ img {
 
 .ana-resim-etiket.pasif-etiket {
   background: #999;
+}
+
+/* === Admin: Aranabilir Mahalle Seçici === */
+.mahalle-oneri-kutusu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.mahalle-oneri-item {
+  padding: 9px 14px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.mahalle-oneri-item:hover {
+  background: #fffde7;
+  color: #111;
+}
+
+.mahalle-oneri-bos {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #999;
 }

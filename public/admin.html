@@ -84,9 +84,12 @@
                     <label>İlçe (İzmir)</label>
                     <select id="ilce-sec" onchange="mahalleleriDoldur()"></select>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="position:relative;">
                     <label>Mahalle</label>
-                    <select id="mahalle-sec" onchange="konumGuncelle()"></select>
+                    <input type="text" id="mahalle-arama" placeholder="Yazarak arayın veya listeden seçin..."
+                        autocomplete="off" oninput="mahalleAra()" onfocus="mahalleAra()" />
+                    <div id="mahalle-oneri-kutusu" class="mahalle-oneri-kutusu"></div>
+                    <select id="mahalle-sec" class="gizli-alan"></select>
                 </div>
             </div>
 
@@ -482,9 +485,59 @@
                 opt.textContent = mahalle;
                 mahalleSec.appendChild(opt);
             });
-            if (seciliMahalle) mahalleSec.value = seciliMahalle;
+            mahalleSec.value = seciliMahalle || "";
+            document.getElementById("mahalle-arama").value = seciliMahalle || "";
+            document.getElementById("mahalle-oneri-kutusu").style.display = "none";
             konumGuncelle();
         }
+
+        // Mahalle arama kutusuna yazıldıkça (ya da tıklanınca) o ilçenin
+        // mahallelerini filtreleyip aşağıda öneri listesi olarak gösterir —
+        // bazı ilçelerde 100+ mahalle olduğu için düz açılır liste yerine
+        // sahibinden tarzı "yazarak ara" deneyimi.
+        function mahalleAra() {
+            const ilce = document.getElementById("ilce-sec").value;
+            const sorgu = document.getElementById("mahalle-arama").value.trim().toLocaleLowerCase("tr");
+            const tumMahalleler = IZMIR_MAHALLELERI[ilce] || [];
+            const sonuclar = sorgu
+                ? tumMahalleler.filter((m) => m.toLocaleLowerCase("tr").includes(sorgu))
+                : tumMahalleler;
+
+            const kutu = document.getElementById("mahalle-oneri-kutusu");
+            kutu.innerHTML = "";
+
+            if (sonuclar.length === 0) {
+                const bos = document.createElement("div");
+                bos.className = "mahalle-oneri-bos";
+                bos.textContent = "Sonuç bulunamadı";
+                kutu.appendChild(bos);
+            } else {
+                sonuclar.forEach((mahalle) => {
+                    const item = document.createElement("div");
+                    item.className = "mahalle-oneri-item";
+                    item.textContent = mahalle;
+                    item.addEventListener("click", () => mahalleSecimYap(mahalle));
+                    kutu.appendChild(item);
+                });
+            }
+            kutu.style.display = "block";
+        }
+
+        function mahalleSecimYap(mahalle) {
+            document.getElementById("mahalle-sec").value = mahalle;
+            document.getElementById("mahalle-arama").value = mahalle;
+            document.getElementById("mahalle-oneri-kutusu").style.display = "none";
+            konumGuncelle();
+        }
+
+        // Öneri kutusunun dışına tıklanınca kapat
+        document.addEventListener("click", (e) => {
+            const kutu = document.getElementById("mahalle-oneri-kutusu");
+            const arama = document.getElementById("mahalle-arama");
+            if (kutu && arama && e.target !== arama && !kutu.contains(e.target)) {
+                kutu.style.display = "none";
+            }
+        });
 
         let konumElleDuzenleniyor = false;
 

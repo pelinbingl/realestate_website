@@ -32,6 +32,7 @@
         content="Aliağa ve İzmir'de kiralık daire ve residence ilanları. Uygun fiyatlı, güncel kiralık ev seçenekleri Emlak Durağı'nda.">
     <meta name="twitter:image" content="https://www.emlakduragim.com/icon-512.png">
     <link rel="stylesheet" href="style.css">
+    <script src="il-ilce-data.js"></script>
     <script src="components.js"></script>
 </head>
 
@@ -53,6 +54,13 @@
             <div class="filtre-grup">
                 <label>İlan Türü</label>
                 <div class="filtre-ilan-turu">Kiralık</div>
+            </div>
+
+            <div class="filtre-grup">
+                <label>İlçe</label>
+                <select id="f-ilce">
+                    <option value="">Tümü</option>
+                </select>
             </div>
 
             <div class="filtre-grup">
@@ -125,6 +133,14 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             ilanlariYukle();
+
+            const ilceSec = document.getElementById('f-ilce');
+            IZMIR_ILCELERI.forEach((ilce) => {
+                const opt = document.createElement('option');
+                opt.value = ilce;
+                opt.textContent = ilce;
+                ilceSec.appendChild(opt);
+            });
         });
 
         async function ilanlariYukle() {
@@ -180,6 +196,7 @@
 
         function filtreUygula() {
             const emlakTuru = document.getElementById('f-emlak-turu').value;
+            const ilce = document.getElementById('f-ilce').value;
             const oda = document.getElementById('f-oda').value;
             const minFiyat = Number(document.getElementById('f-min-fiyat').value) || 0;
             const maxFiyat = Number(document.getElementById('f-max-fiyat').value) || Infinity;
@@ -187,6 +204,7 @@
 
             const filtrelenmis = tumIlanlar.filter(ilan => {
                 if (emlakTuru && ilan.emlak_tipi !== emlakTuru) return false;
+                if (ilce && !(ilan.konum || '').includes(ilce)) return false;
                 if (oda && ilan.oda !== oda) return false;
                 if (ilan.fiyat < minFiyat || ilan.fiyat > maxFiyat) return false;
                 if (ilan.metrekare < minM2) return false;
@@ -198,6 +216,7 @@
 
         function filtreleriTemizle() {
             document.getElementById('f-emlak-turu').value = '';
+            document.getElementById('f-ilce').value = '';
             document.getElementById('f-oda').value = '';
             document.getElementById('f-min-fiyat').value = '';
             document.getElementById('f-max-fiyat').value = '';

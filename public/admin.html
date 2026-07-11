@@ -146,14 +146,15 @@
                 <input type="text" id="baslik" placeholder="örn: Satılık 2+1 Daire" />
             </div>
 
-            <div class="form-group">
-                <label>İlçe (İzmir)</label>
-                <select id="ilce-sec" onchange="mahalleleriDoldur()"></select>
-            </div>
-
-            <div class="form-group">
-                <label>Mahalle</label>
-                <select id="mahalle-sec" onchange="konumGuncelle()"></select>
+            <div style="display:flex; gap:12px;">
+                <div class="form-group" style="flex:1;">
+                    <label>İlçe (İzmir)</label>
+                    <select id="ilce-sec" onchange="mahalleleriDoldur()"></select>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Mahalle</label>
+                    <select id="mahalle-sec" onchange="konumGuncelle()"></select>
+                </div>
             </div>
 
             <div class="form-group">
@@ -167,9 +168,18 @@
             </div>
 
             <div class="form-group">
-                <label>Konum <span style="color:#999;font-weight:400;font-size:12px">(seçimlere göre otomatik dolar,
-                        istersen elle düzenle)</span></label>
-                <textarea id="konum" rows="2" placeholder="örn: İzmir, Aliağa"></textarea>
+                <label style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                    <span>Konum <span style="color:#999;font-weight:400;font-size:12px">(seçimlere göre otomatik
+                            dolar)</span></span>
+                    <span style="display:flex; gap:10px; font-weight:400;">
+                        <a href="#" onclick="konumHaritadaAc(event)"
+                            style="font-size:12px;color:#2196F3;text-decoration:none;">🗺️ Haritada önizle</a>
+                        <a href="#" onclick="konumDuzenlemeyiAc(event)" id="konum-duzenle-link"
+                            style="font-size:12px;color:#f9a01a;text-decoration:none;">✏️ Elle düzenle</a>
+                    </span>
+                </label>
+                <textarea id="konum" rows="2" placeholder="örn: İzmir, Aliağa" readonly
+                    style="background:#f7f7f7; cursor:not-allowed;"></textarea>
             </div>
 
             <div class="form-group">
@@ -580,7 +590,10 @@
             konumGuncelle();
         }
 
+        let konumElleDuzenleniyor = false;
+
         function konumGuncelle() {
+            if (konumElleDuzenleniyor) return; // admin elle düzenliyorsa otomatik değerle ezme
             const ilce = document.getElementById("ilce-sec").value;
             const mahalle = document.getElementById("mahalle-sec").value;
             const sokak = document.getElementById("sokak").value.trim();
@@ -593,6 +606,44 @@
                 "İzmir",
             ].filter(Boolean);
             document.getElementById("konum").value = parcalar.join(", ");
+        }
+
+        // "🗺️ Haritada önizle" — girilen adresi yeni sekmede Google Maps'te açar,
+        // admin fiziksel konumun doğru olduğunu görsel olarak teyit edebilir.
+        function konumHaritadaAc(e) {
+            e.preventDefault();
+            const adres = document.getElementById("konum").value.trim();
+            if (!adres) {
+                alert("Önce bir konum girin.");
+                return;
+            }
+            window.open(
+                "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(adres),
+                "_blank"
+            );
+        }
+
+        // "✏️ Elle düzenle" — otomatik doldurmayı geçici olarak kapatıp admin'in
+        // konum metnini serbestçe yazmasına izin verir; tekrar tıklayınca otomatik moda döner.
+        function konumDuzenlemeyiAc(e) {
+            e.preventDefault();
+            const kutu = document.getElementById("konum");
+            const link = document.getElementById("konum-duzenle-link");
+            konumElleDuzenleniyor = !konumElleDuzenleniyor;
+
+            if (konumElleDuzenleniyor) {
+                kutu.readOnly = false;
+                kutu.style.background = "#fff";
+                kutu.style.cursor = "text";
+                kutu.focus();
+                link.textContent = "🔒 Otomatik moda dön";
+            } else {
+                kutu.readOnly = true;
+                kutu.style.background = "#f7f7f7";
+                kutu.style.cursor = "not-allowed";
+                link.textContent = "✏️ Elle düzenle";
+                konumGuncelle(); // otomatik moda dönünce güncel seçimlere göre yeniden doldur
+            }
         }
 
         // === AÇIKLAMA ZENGİN METİN EDİTÖRÜ ===
@@ -742,6 +793,11 @@
 
             duzenlemeModu = true;
             duzenleIlanId = id;
+            konumElleDuzenleniyor = false;
+            document.getElementById("konum").readOnly = true;
+            document.getElementById("konum").style.background = "#f7f7f7";
+            document.getElementById("konum").style.cursor = "not-allowed";
+            document.getElementById("konum-duzenle-link").textContent = "✏️ Elle düzenle";
 
             document.getElementById("form-baslik").textContent = "✏️ İlan Düzenle";
             document.getElementById("kaydet-btn").textContent = "💾 Güncelle";
@@ -1236,6 +1292,12 @@
             anaResimIndex = 0;
             anaResimTipi = "yeni";
             mevcutResimler = [];
+            konumElleDuzenleniyor = false;
+            const konumKutu = document.getElementById("konum");
+            konumKutu.readOnly = true;
+            konumKutu.style.background = "#f7f7f7";
+            konumKutu.style.cursor = "not-allowed";
+            document.getElementById("konum-duzenle-link").textContent = "✏️ Elle düzenle";
             document.getElementById("onizleme-grid").innerHTML = "";
             document.getElementById("resim-input").value = "";
             document.getElementById("sokak").value = "";

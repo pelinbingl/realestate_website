@@ -68,7 +68,11 @@ const loginLimiter = rateLimit({
   max: 5,
   message: { hata: 'Çok fazla deneme yapıldı. Lütfen 10 dakika sonra tekrar deneyin.' },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  handler: (req, res) => {
+    console.error(`🚨 IP ENGELLENDİ (olası brute-force) — IP: ${req.ip} — Zaman: ${new Date().toISOString()}`);
+    res.status(429).json({ hata: 'Çok fazla deneme yapıldı. Lütfen 10 dakika sonra tekrar deneyin.' });
+  }
 });
 
 // İletişim formu spam koruması: 1 saatte en fazla 10 mesaj
@@ -106,9 +110,15 @@ function escapeHtml(str) {
 
 app.post('/api/admin/login', loginLimiter, (req, res) => {
   const { sifre } = req.body;
+  const ip = req.ip;
+  const zaman = new Date().toISOString();
+
   if (!sifre || sifre !== process.env.ADMIN_SIFRE) {
+    console.warn(`🔒 BAŞARISIZ giriş denemesi — IP: ${ip} — Zaman: ${zaman}`);
     return res.status(401).json({ hata: 'Hatalı şifre' });
   }
+
+  console.log(`✅ Başarılı admin girişi — IP: ${ip} — Zaman: ${zaman}`);
   const token = crypto.randomBytes(32).toString('hex');
   validTokens.set(token, Date.now() + TOKEN_OMRU);
   res.json({ token });

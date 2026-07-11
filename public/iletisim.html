@@ -143,6 +143,15 @@
 
                 <div id="form-mesaj" style="display:none;" class="form-bildirim"></div>
 
+                <div class="form-group" style="display:flex; align-items:flex-start; gap:8px; margin-bottom:16px;">
+                    <input type="checkbox" id="kvkk_onay" style="margin-top:4px; width:auto; cursor:pointer;">
+                    <label for="kvkk_onay" style="font-weight:400; font-size:13px; color:#555; cursor:pointer;">
+                        <a href="/gizlilik-politikasi" target="_blank" style="color:#2196F3;">KVKK Aydınlatma
+                            Metni</a>'ni okudum, kişisel verilerimin belirtilen amaçlarla işlenmesini kabul
+                        ediyorum. <span class="zorunlu">*</span>
+                    </label>
+                </div>
+
                 <button class="iletisim-gonder-btn" onclick="formuGonder()">Mesaj Gönder</button>
 
                 <p class="gizlilik-notu">
@@ -165,9 +174,15 @@
             const email = document.getElementById('email').value.trim();
             const konu = document.getElementById('konu').value;
             const mesaj = document.getElementById('mesaj').value.trim();
+            const kvkkOnay = document.getElementById('kvkk_onay').checked;
 
             if (!ad_soyad || !telefon || !email || !konu || !mesaj) {
                 bildirimGoster('Lütfen tüm zorunlu alanları doldurun!', 'hata');
+                return;
+            }
+
+            if (!kvkkOnay) {
+                bildirimGoster('Devam etmek için KVKK Aydınlatma Metni\'ni onaylamanız gerekiyor.', 'hata');
                 return;
             }
 
@@ -180,7 +195,7 @@
                 const cevap = await fetch('/api/iletisim', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ad_soyad, telefon, email, konu, mesaj })
+                    body: JSON.stringify({ ad_soyad, telefon, email, konu, mesaj, kvkk_onay: kvkkOnay })
                 });
 
                 const sonuc = await cevap.json();
@@ -191,6 +206,7 @@
                         document.getElementById(id).value = '';
                     });
                     document.getElementById('konu').value = '';
+                    document.getElementById('kvkk_onay').checked = false;
                 } else {
                     bildirimGoster('❌ ' + sonuc.hata, 'hata');
                 }

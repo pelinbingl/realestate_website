@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sayfa Bulunamadı | Emlak Durağı</title>
+    <meta name="robots" content="noindex, follow">
+    <link rel="stylesheet" href="style.css">
+    <script src="components.js"></script>
+    <style>
+        .hata-404-alan {
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 24px;
+        }
+
+        .hata-404-kod {
+            font-family: 'Poppins', sans-serif;
+            font-size: 110px;
+            font-weight: 800;
+            color: #f9e01a;
+            -webkit-text-stroke: 2px #111;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .hata-404-baslik {
+            font-size: 24px;
+            color: #111;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .hata-404-metin {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 30px;
+            max-width: 420px;
+        }
+
+        .hata-404-linkler {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .hata-404-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            transition: transform 0.15s;
+        }
+
+        .hata-404-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .hata-404-btn-sari {
+            background: #f9e01a;
+            color: #111;
+        }
+
+        .hata-404-btn-siyah {
+            background: #111;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ORTAK HEADER -->
+    <div id="header-alani"></div>
+
+    <div class="hata-404-alan">
+        <div class="hata-404-kod">404</div>
+        <div class="hata-404-baslik">Aradığınız sayfa bulunamadı</div>
+        <p class="hata-404-metin">
+            Bağlantı hatalı olabilir ya da bu sayfa kaldırılmış olabilir. Ana sayfaya dönüp aradığınız ilanı
+            oradan bulabilirsiniz.
+        </p>
+        <div class="hata-404-linkler">
+            <a href="/" class="hata-404-btn hata-404-btn-sari">🏠 Ana Sayfaya Dön</a>
+            <a href="/satilik" class="hata-404-btn hata-404-btn-siyah">Satılık İlanlar</a>
+            <a href="/kiralik" class="hata-404-btn hata-404-btn-siyah">Kiralık İlanlar</a>
+        </div>
+    </div>
+
+    <!-- ORTAK FOOTER -->
+    <div id="footer-alani"></div>
+
+</body>
+
+</html>

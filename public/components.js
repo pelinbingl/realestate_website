@@ -118,7 +118,7 @@ function footerYukle() {
         </div>
       </div>
       <div class="footer-bottom">
-        <p>© 2026 Emlak Durağı. Tüm hakları saklıdır.</p>
+        <p>© 2026 Emlak Durağı. Tüm hakları saklıdır. &nbsp;|&nbsp; <a href="/gizlilik-politikasi" style="color:inherit;text-decoration:underline;">Gizlilik Politikası (KVKK)</a></p>
       </div>
     </footer>
   `;

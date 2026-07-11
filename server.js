@@ -459,10 +459,14 @@ const transporter = nodemailer.createTransport({
 
 // === İLETİŞİM FORMU MAİL GÖNDER ===
 app.post('/api/iletisim', iletisimLimiter, async (req, res) => {
-  const { ad_soyad, telefon, email, konu, mesaj } = req.body;
+  const { ad_soyad, telefon, email, konu, mesaj, kvkk_onay } = req.body;
 
   if (!ad_soyad || !telefon || !email || !konu || !mesaj) {
     return res.status(400).json({ hata: 'Tüm alanlar zorunlu!' });
+  }
+
+  if (!kvkk_onay) {
+    return res.status(400).json({ hata: 'KVKK Aydınlatma Metni onayı olmadan mesaj gönderilemez.' });
   }
 
   try {
@@ -486,6 +490,17 @@ app.post('/api/iletisim', iletisimLimiter, async (req, res) => {
     console.error('Mail hatası:', hata);
     res.status(500).json({ hata: 'Mail gönderilemedi!' });
   }
+});
+
+// === 404: EŞLEŞMEYEN TÜM İSTEKLER ===
+// Bu middleware, yukarıdaki hiçbir route/statik dosya ile eşleşmeyen tüm
+// isteklerde devreye girer. API istekleri için JSON, sayfa istekleri için
+// markalı 404 sayfası döner.
+app.use((req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ hata: 'Uç nokta bulunamadı' });
+  }
+  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
 hazir.then(() => {

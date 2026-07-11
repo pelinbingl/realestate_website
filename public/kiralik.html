@@ -110,7 +110,17 @@
 
             <div class="liste-baslik-bar">
                 <h1>Kiralık İlanlar</h1>
-                <span id="ilan-sayisi" class="ilan-sayisi">Yükleniyor...</span>
+                <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+                    <span id="ilan-sayisi" class="ilan-sayisi">Yükleniyor...</span>
+                    <select id="siralama" onchange="filtreUygula()"
+                        style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-size:13px; color:#444; font-family:inherit; cursor:pointer;">
+                        <option value="yeni">En Yeni</option>
+                        <option value="fiyat-artan">Fiyat: Düşükten Yükseğe</option>
+                        <option value="fiyat-azalan">Fiyat: Yüksekten Düşüğe</option>
+                        <option value="m2-artan">m²: Küçükten Büyüğe</option>
+                        <option value="m2-azalan">m²: Büyükten Küçüğe</option>
+                    </select>
+                </div>
             </div>
 
             <div class="liste-grid" id="liste-grid"></div>
@@ -201,6 +211,7 @@
             const minFiyat = Number(document.getElementById('f-min-fiyat').value) || 0;
             const maxFiyat = Number(document.getElementById('f-max-fiyat').value) || Infinity;
             const minM2 = Number(document.getElementById('f-min-m2').value) || 0;
+            const siralama = document.getElementById('siralama').value;
 
             const filtrelenmis = tumIlanlar.filter(ilan => {
                 if (emlakTuru && ilan.emlak_tipi !== emlakTuru) return false;
@@ -211,7 +222,18 @@
                 return true;
             });
 
+            siraliListeyiUygula(filtrelenmis, siralama);
             ilanlariGoster(filtrelenmis);
+        }
+
+        function siraliListeyiUygula(liste, siralama) {
+            const siralayicilar = {
+                'fiyat-artan': (a, b) => a.fiyat - b.fiyat,
+                'fiyat-azalan': (a, b) => b.fiyat - a.fiyat,
+                'm2-artan': (a, b) => (a.metrekare || 0) - (b.metrekare || 0),
+                'm2-azalan': (a, b) => (b.metrekare || 0) - (a.metrekare || 0),
+            };
+            if (siralayicilar[siralama]) liste.sort(siralayicilar[siralama]);
         }
 
         function filtreleriTemizle() {
@@ -221,6 +243,7 @@
             document.getElementById('f-min-fiyat').value = '';
             document.getElementById('f-max-fiyat').value = '';
             document.getElementById('f-min-m2').value = '';
+            document.getElementById('siralama').value = 'yeni';
             ilanlariGoster(tumIlanlar);
         }
     </script>

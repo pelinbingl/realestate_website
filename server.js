@@ -22,9 +22,11 @@ app.use(helmet({
 app.use(express.static('public', { extensions: ['html'] }));
 app.use(express.json());
 
-// /admin adresi de /admin.html ile aynı sayfayı göstersin
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+// Admin paneli artık tahmin edilmesi zor bir adreste yayında.
+// (Not: gerçek güvenlik yine de şifre + rate limit + token doğrulamasından
+// geliyor; bu sadece ek bir gizlilik katmanı.)
+app.get('/yonetim-56209', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'yonetim-56209.html'));
 });
 
 // === SITEMAP.XML (dinamik) ===

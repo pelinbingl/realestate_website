@@ -220,7 +220,15 @@
 
             // === BAŞLIK / FİYAT ===
             document.getElementById('detay-baslik').textContent = ilan.baslik;
-            document.getElementById('detay-konum-yazi').textContent = '📍 ' + ilan.konum;
+            // Üst özet kutusunda (başlık/fiyat yanında) sadece mahalle gösterilir —
+            // tam adres (sokak, no, ilçe/il) hâlâ Harita bölümünde eksiksiz duruyor.
+            function konumOzetiCikar(konum) {
+                if (!konum) return '';
+                const parcalar = konum.split(',').map((p) => p.trim());
+                const mahalleParcasi = parcalar.find((p) => p.endsWith('Mah.'));
+                return mahalleParcasi || parcalar[0] || konum;
+            }
+            document.getElementById('detay-konum-yazi').textContent = '📍 ' + konumOzetiCikar(ilan.konum);
 
             const fiyatGoster = ilan.tip === 'kiralik'
                 ? `₺${ilan.fiyat.toLocaleString('tr-TR')} / ay`
